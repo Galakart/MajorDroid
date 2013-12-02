@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <ListPreference
+        android:defaultValue="1"
+        android:dialogTitle="Режим:"
+        android:entries="@array/dostup"
+        android:entryValues="@array/dostup"
+        android:key="@string/dostup"
+        android:summary="@string/dostup_summary"
+        android:title="@string/dostup" />
+
+    <EditTextPreference
+        android:dialogTitle="Адрес сервера:"
+        android:key="@string/localUrl"
+        android:summary="@string/localUrl_summary"
+        android:title="@string/localUrl" />
+    <EditTextPreference
+        android:dialogTitle="Адрес сервера:"
+        android:key="@string/globalUrl"
+        android:summary="@string/globalUrl_summary"
+        android:title="@string/globalUrl" />
+    <EditTextPreference
+        android:dialogTitle="Логин:"
+        android:key="@string/login"
+        android:summary="@string/login_summary"
+        android:title="@string/login" />
+    <EditTextPreference
+        android:dialogTitle="Пароль:"
+        android:key="@string/passw"
+        android:summary="@string/passw_summary"
+        android:title="@string/passw" />
+
+</PreferenceScreen>
