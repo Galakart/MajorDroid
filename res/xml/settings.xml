@@ -2,33 +2,90 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <ListPreference
-        android:defaultValue="1"
+        android:defaultValue="Локальный"
         android:dialogTitle="Режим:"
         android:entries="@array/dostup"
         android:entryValues="@array/dostup"
         android:key="@string/dostup"
         android:summary="@string/dostup_summary"
         android:title="@string/dostup" />
+    <ListPreference
+        android:defaultValue="Обычный"
+        android:dialogTitle="Интерфейс:"
+        android:entries="@array/vid"
+        android:entryValues="@array/vid"
+        android:key="@string/vid"
+        android:summary="@string/vid_summary"
+        android:title="@string/vid" />
 
-    <EditTextPreference
-        android:dialogTitle="Адрес сервера:"
-        android:key="@string/localUrl"
-        android:summary="@string/localUrl_summary"
-        android:title="@string/localUrl" />
-    <EditTextPreference
-        android:dialogTitle="Адрес сервера:"
-        android:key="@string/globalUrl"
-        android:summary="@string/globalUrl_summary"
-        android:title="@string/globalUrl" />
-    <EditTextPreference
-        android:dialogTitle="Логин:"
-        android:key="@string/login"
-        android:summary="@string/login_summary"
-        android:title="@string/login" />
-    <EditTextPreference
-        android:dialogTitle="Пароль:"
-        android:key="@string/passw"
-        android:summary="@string/passw_summary"
-        android:title="@string/passw" />
+    <PreferenceCategory android:title="IP-адреса сервера" >
+        <EditTextPreference
+            android:dialogTitle="Адрес сервера (без http://):"
+            android:key="@string/localUrl"
+            android:summary="@string/localUrl_summary"
+            android:title="@string/localUrl" />
+        <EditTextPreference
+            android:dialogTitle="Адрес сервера (без http://):"
+            android:key="@string/globalUrl"
+            android:summary="@string/globalUrl_summary"
+            android:title="@string/globalUrl" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Пользователь" >
+        <EditTextPreference
+            android:dialogTitle="Логин:"
+            android:key="@string/login"
+            android:summary="@string/login_summary"
+            android:title="@string/login" />
+        <EditTextPreference
+            android:dialogTitle="Пароль:"
+            android:inputType="textPassword"
+            android:key="@string/passw"
+            android:summary="@string/passw_summary"
+            android:title="@string/passw" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Настройка пульта управления" >
+        <PreferenceScreen
+            android:summary="Устанавливает выполнение скриптов MajorDomo на выбранные кнопки"
+            android:title="Привязка кнопок" >
+            <PreferenceCategory android:title="Привяжите выбранную кнопку на скрипт MajorDomo" >
+                <EditTextPreference
+                    android:dialogTitle="@string/scriptdialog"
+                    android:key="@string/scriptname1"
+                    android:title="Кнопка 1" />
+                <EditTextPreference
+                    android:dialogTitle="@string/scriptdialog"
+                    android:key="@string/scriptname2"
+                    android:title="Кнопка 2" />
+                <EditTextPreference
+                    android:dialogTitle="@string/scriptdialog"
+                    android:key="@string/scriptname3"
+                    android:title="Кнопка 3" />
+                <EditTextPreference
+                    android:dialogTitle="@string/scriptdialog"
+                    android:key="@string/scriptname4"
+                    android:title="Кнопка 4" />
+                <EditTextPreference
+                    android:dialogTitle="@string/scriptdialog"
+                    android:key="@string/scriptname5"
+                    android:title="Кнопка 5" />
+                <EditTextPreference
+                    android:dialogTitle="@string/scriptdialog"
+                    android:key="@string/scriptname6"
+                    android:title="Кнопка 6" />
+                <EditTextPreference
+                    android:dialogTitle="@string/scriptdialog"
+                    android:key="@string/scriptname7"
+                    android:title="Кнопка 7" />
+                <EditTextPreference
+                    android:dialogTitle="@string/scriptdialog"
+                    android:key="@string/scriptname8"
+                    android:title="Кнопка 8" />
+                <EditTextPreference
+                    android:dialogTitle="@string/scriptdialog"
+                    android:key="@string/scriptname9"
+                    android:title="Кнопка 9" />
+            </PreferenceCategory>
+        </PreferenceScreen>
+    </PreferenceCategory>
 
 </PreferenceScreen>

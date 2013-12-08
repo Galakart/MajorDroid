@@ -4,4 +4,9 @@
 		<item>Локальный</item>
 		<item>Глобальный</item>
 	</string-array>
+	
+    <string-array name="vid">
+		<item>Обычный</item>
+		<item>Полноэкранный</item>
+	</string-array>
 </resources>

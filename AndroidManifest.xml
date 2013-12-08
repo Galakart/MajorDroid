@@ -14,7 +14,7 @@
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@android:style/Theme.Black.NoTitleBar" >
         <activity
             android:name="ru.galakart.majordroid.MainActivity"
             android:label="@string/app_name"
@@ -33,6 +33,11 @@
         <activity
             android:name="ru.galakart.majordroid.Prefs"
             android:label="@string/action_settings"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="ru.galakart.majordroid.AboutActivity"
+            android:label="@string/title_activity_about"
             android:screenOrientation="portrait" >
         </activity>
     </application>

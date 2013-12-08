@@ -3,8 +3,11 @@
 
     <string name="app_name">MajorDroid</string>
     <string name="action_settings">Настройки</string>
+    <string name="action_quit">Выход</string>
     <string name="hello_world">Hello world!</string>
-    <string name="title_activity_contros">Кнопки управления</string>
+    <string name="title_activity_contros">Пульт управления</string>
+    <string name="action_voice">Голосовая команда</string>
+    <string name="action_refresh">Обновить</string>
     <string name="localUrl">Локальный адрес</string>
     <string name="localUrl_summary">Адрес сервера в локальной сети</string>
     <string name="globalUrl">Глобальный адрес</string>
@@ -14,6 +17,23 @@
     <string name="passw">Пароль</string>
     <string name="passw_summary">Пароль для внешнего доступа</string>
     <string name="dostup">Режим доступа</string>
-    <string name="dostup_summary">Доступ локальный или глобальный</string>
+    <string name="dostup_summary">Локальный или глобальный</string>
+    <string name="vid">Интерфейс</string>
+    <string name="vid_summary">Обычный или полноэкранный</string>
+    <string name="scriptdialog">Название скрипта в MajorDomo:</string>
+    <string name="script_summary">Задайте название скрипта</string>
+    <string name="scriptname1">Скрипт 1</string>
+    <string name="scriptname2">Скрипт 2</string>
+    <string name="scriptname3">Скрипт 3</string>
+    <string name="scriptname4">Скрипт 4</string>
+    <string name="scriptname5">Скрипт 5</string>
+    <string name="scriptname6">Скрипт 6</string>
+    <string name="scriptname7">Скрипт 7</string>
+    <string name="scriptname8">Скрипт 8</string>
+    <string name="scriptname9">Скрипт 9</string>
+    <string name="title_activity_about">О программе</string>
+    <string name="title_btn_rate">Оценить приложение</string>
+    <string name="about_url">http://smartliving.ru</string>
+    <string name="about_text">Приложение для управления сервером умного дома MajorDomo.\n\nВерсия 1.0</string>
 
 </resources>
