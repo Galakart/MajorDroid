@@ -9,3 +9,5 @@ MajorDroid
 
 Внимание! Необходим установленный и настроенный сервер MajorDomo!
 Основная информация на http://smartliving.ru
+
+Рабочая версия приложения доступна на Google Play по ссылке https://play.google.com/store/apps/details?id=ru.galakart.majordroid
