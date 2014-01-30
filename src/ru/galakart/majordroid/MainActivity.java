@@ -146,15 +146,15 @@ public class MainActivity extends Activity {
 			serverURL = globalURL;
 		}
 		if (vid.contains("Обычный")) {
-			this.getWindow().setFlags(
-					WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN,
+			getWindow().addFlags(
 					WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		}
 
 		if (vid.contains("Полноэкранный")) {
-			this.getWindow().setFlags(
-					WindowManager.LayoutParams.FLAG_FULLSCREEN,
-					WindowManager.LayoutParams.FLAG_FULLSCREEN);
+			getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+			getWindow().clearFlags(
+					WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
 		}
 		firstLoadHomepage();
 	}

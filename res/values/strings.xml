@@ -32,8 +32,8 @@
     <string name="scriptname8">Скрипт 8</string>
     <string name="scriptname9">Скрипт 9</string>
     <string name="title_activity_about">О программе</string>
-    <string name="title_btn_rate">Оценить приложение</string>
-    <string name="about_url">http://smartliving.ru</string>
-    <string name="about_text">Приложение для управления сервером умного дома MajorDomo.\n\nВерсия 1.0</string>
+    <string name="title_btn_rate">Оценить в маркете</string>
+    <string name="about_url">v1.1 http://smartliving.ru</string>
+    <string name="about_donate">Приложение для управления сервером умного дома MajorDomo.\n\nЛицензия Beerware - каждый довольный пользователь может выпить пива в честь автора android-приложения, или поддержать материально:\nWebMoney: R052376421830</string>
 
 </resources>

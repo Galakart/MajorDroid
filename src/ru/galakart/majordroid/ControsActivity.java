@@ -1,6 +1,5 @@
 package ru.galakart.majordroid;
 
-import ru.galakart.majordroid.MainActivity.MajorDroidWebViewer;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -9,6 +8,7 @@ import android.text.method.ScrollingMovementMethod;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.View;
+import android.view.WindowManager;
 import android.webkit.HttpAuthHandler;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -26,6 +26,19 @@ public class ControsActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		SharedPreferences prefs = PreferenceManager
+				.getDefaultSharedPreferences(this);
+		String vid = prefs.getString(getString(R.string.vid), "");
+		if (vid.contains("Обычный")) {
+			getWindow().addFlags(
+					WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		}
+		if (vid.contains("Полноэкранный")) {
+			getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+			getWindow().clearFlags(
+					WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+		}
 		setContentView(R.layout.activity_contros);
 		webPost = (WebView) findViewById(R.id.webPost);
 		webPost.getSettings().setJavaScriptEnabled(true);

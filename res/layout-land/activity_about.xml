@@ -8,14 +8,7 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".AboutActivity" >
 
-    <ImageView
-        android:id="@+id/imageView1"
-        android:layout_width="130dp"
-        android:layout_height="100dp"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="1dp"
-        android:src="@drawable/logo_about" />
+    
 
     <TextView
         android:id="@+id/tv_donate"
@@ -24,7 +17,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="105dp"
+        android:layout_marginBottom="95dp"
         android:gravity="center_horizontal"
         android:scrollbars="vertical"
         android:text="@string/about_donate" />
@@ -35,7 +28,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="40dp"
+        android:layout_marginBottom="30dp"
         android:onClick="btn_rate_exec"
         android:text="@string/title_btn_rate" />
 
@@ -45,8 +38,17 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="10dp"
+        android:layout_marginBottom="5dp"
         android:autoLink="web"
         android:text="@string/about_url" />
+    <ImageView
+        android:id="@+id/imageView1"
+        android:layout_width="120dp"
+        android:layout_height="80dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="false"
+        android:layout_marginBottom="1dp"
+        android:gravity="center_horizontal"
+        android:src="@drawable/logo_about" />
 
 </RelativeLayout>
