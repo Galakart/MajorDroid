@@ -11,3 +11,5 @@ MajorDroid
 Основная информация на http://smartliving.ru
 
 Рабочая версия приложения доступна на Google Play по ссылке https://play.google.com/store/apps/details?id=ru.galakart.majordroid
+
+Лицензия Beerware - каждый довольный пользователь может выпить пива в честь автора android-приложения, или поддержать материально на WebMoney: R052376421830
