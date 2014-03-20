@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.net.http.SslError;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.speech.RecognizerIntent;
@@ -17,17 +19,12 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.HttpAuthHandler;
-import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
-import android.webkit.WebSettings.RenderPriority;
-import android.webkit.WebStorage;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -36,7 +33,10 @@ public class MainActivity extends Activity {
 	private WebView mWebView;
 	private WebView webPost;
 	private ProgressBar Pbar;
-	private String localURL, globalURL, serverURL, login, passw;
+	private String localURL = "", globalURL = "", serverURL = "", login = "",
+			passw = "", wifiHomeNet = "";
+	private String tmpDostupAccess = "";
+	private String tmpAdressAccess = "";
 	private boolean outAccess = false;
 	private boolean firstLoad = false;
 	private static final int REQUEST_CODE = 1234;
@@ -122,29 +122,32 @@ public class MainActivity extends Activity {
 			if (outAccess)
 				handler.proceed(login, passw);
 		}
+
+		// @Override
+		// public void onPageStarted(WebView view, String url, Bitmap favicon) {
+		// super.onPageStarted(view, url, favicon);
+		//
+		// }
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
+		loadHomePage(0);
+	}
+
+	private void loadHomePage(int immediateLoad) {
 		SharedPreferences prefs = PreferenceManager
 				.getDefaultSharedPreferences(this);
-
 		localURL = prefs.getString(getString(R.string.localUrl), "");
 		globalURL = prefs.getString(getString(R.string.globalUrl), "");
 		login = prefs.getString(getString(R.string.login), "");
 		passw = prefs.getString(getString(R.string.passw), "");
 		String dostup = prefs.getString(getString(R.string.dostup), "");
 		String vid = prefs.getString(getString(R.string.vid), "");
+		String wifiHomeNet = prefs.getString("wifihomenet", "");
+		String wifiToast = "";
 
-		if (dostup.contains("Локальный")) {
-			outAccess = false;
-			serverURL = localURL;
-
-		} else if (dostup.contains("Глобальный")) {
-			outAccess = true;
-			serverURL = globalURL;
-		}
 		if (vid.contains("Обычный")) {
 			getWindow().addFlags(
 					WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
@@ -156,25 +159,62 @@ public class MainActivity extends Activity {
 			getWindow().clearFlags(
 					WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
 		}
-		firstLoadHomepage();
-	}
 
-	private void firstLoadHomepage() {
-		if (!firstLoad) {
+		if (!dostup.equals(tmpDostupAccess))
+			firstLoad = false;
+
+		if (dostup.contains("Локальный")) {
+			outAccess = false;
+			serverURL = localURL;
+			wifiToast = "";
+			tmpDostupAccess = dostup;
+
+		} else if (dostup.contains("Глобальный")) {
+			outAccess = true;
+			serverURL = globalURL;
+			wifiToast = "";
+			tmpDostupAccess = dostup;
+
+		} else if (dostup.contains("Автоматический")) {
+			if (wifiHomeNet != "") {
+				if (isConnectedToSSID(wifiHomeNet)) {
+					outAccess = false;
+					serverURL = localURL;
+					wifiToast = " (SSID: " + wifiHomeNet + ")";
+				} else {
+					outAccess = true;
+					serverURL = globalURL;
+					wifiToast = " (не в домашней сети)";
+				}
+			} else {
+				outAccess = false;
+				serverURL = localURL;
+				wifiToast = " (не задана домашняя wifi-сеть)";
+			}
+			tmpDostupAccess = dostup;
+		}
+		if (!serverURL.equals(tmpAdressAccess))
+			firstLoad = false;
+
+		if ((!firstLoad) || (immediateLoad == 1)) {
 			Toast toast = Toast.makeText(getApplicationContext(), "",
 					Toast.LENGTH_LONG);
 			toast.setGravity(Gravity.BOTTOM, 0, 0);
 			if (outAccess)
-				toast.setText("Глобальный доступ");
+				toast.setText("Глобальный доступ" + wifiToast);
 			else
-				toast.setText("Локальный доступ");
-			if ((serverURL == "") || (serverURL == null))
+				toast.setText("Локальный доступ" + wifiToast);
+			if (serverURL == "") {
 				toast.setText("Не задан адрес сервера в настройках");
-			else {
+				toast.show();
+			} else {
 				mWebView.loadUrl("http://" + serverURL + "/menu.html");
+				// потом использовать reload();
 				firstLoad = true;
+				if (!serverURL.equals(tmpAdressAccess))
+					toast.show();
+				tmpAdressAccess = serverURL;
 			}
-			toast.show();
 		}
 
 	}
@@ -188,7 +228,7 @@ public class MainActivity extends Activity {
 	}
 
 	public void imgb_home_click(View v) {
-		mWebView.loadUrl("http://" + serverURL + "/menu.html");
+		loadHomePage(1);
 	}
 
 	public void imgb_voice_click(View v) {
@@ -219,4 +259,23 @@ public class MainActivity extends Activity {
 		startActivity(i);
 	}
 
+	boolean isConnectedToSSID(String t) {
+		try {
+			WifiManager wifiMgr = (WifiManager) this
+					.getSystemService(Context.WIFI_SERVICE);
+			WifiInfo wifiInfo = wifiMgr.getConnectionInfo();
+			if (wifiInfo.getSSID().equals(t))
+				return true;
+		} catch (Exception a) {
+		}
+		return false;
+	}
+
 }
+
+/*
+ * На будущее: 1. Использовать reload(); при обновлении браузера 2. Использовать
+ * окно браузера для вывода возможных ошибок, вот так String summary =
+ * "<html><body>You scored <b>192</b> points.</body></html>";
+ * webview.loadData(summary, "text/html", null);
+ */

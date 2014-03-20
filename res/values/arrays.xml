@@ -3,6 +3,7 @@
     <string-array name="dostup">
 		<item>Локальный</item>
 		<item>Глобальный</item>
+		<item>Автоматический</item>
 	</string-array>
 	
     <string-array name="vid">

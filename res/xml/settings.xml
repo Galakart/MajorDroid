@@ -18,7 +18,7 @@
         android:summary="@string/vid_summary"
         android:title="@string/vid" />
 
-    <PreferenceCategory android:title="IP-адреса сервера" >
+    <PreferenceCategory android:title="Настройки сервера" >
         <EditTextPreference
             android:dialogTitle="Адрес сервера (без http://):"
             android:key="@string/localUrl"
@@ -29,7 +29,11 @@
             android:key="@string/globalUrl"
             android:summary="@string/globalUrl_summary"
             android:title="@string/globalUrl" />
+        <Preference android:title="Домашняя WiFi-сеть"
+                android:key="button"
+                android:summary="Для автоматического переключения адреса сервера"/>
     </PreferenceCategory>
+
     <PreferenceCategory android:title="Пользователь" >
         <EditTextPreference
             android:dialogTitle="Логин:"

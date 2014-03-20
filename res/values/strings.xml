@@ -17,7 +17,7 @@
     <string name="passw">Пароль</string>
     <string name="passw_summary">Пароль для внешнего доступа</string>
     <string name="dostup">Режим доступа</string>
-    <string name="dostup_summary">Локальный или глобальный</string>
+    <string name="dostup_summary">По локальной или глобальной сети</string>
     <string name="vid">Интерфейс</string>
     <string name="vid_summary">Обычный или полноэкранный</string>
     <string name="scriptdialog">Название скрипта в MajorDomo:</string>
@@ -33,7 +33,8 @@
     <string name="scriptname9">Скрипт 9</string>
     <string name="title_activity_about">О программе</string>
     <string name="title_btn_rate">Оценить в маркете</string>
-    <string name="about_url">v1.1 http://smartliving.ru</string>
+    <string name="about_url">v1.2 http://smartliving.ru</string>
     <string name="about_donate">Приложение для управления сервером умного дома MajorDomo.\n\nЛицензия Beerware - каждый довольный пользователь может выпить пива в честь автора android-приложения, или поддержать материально:\nWebMoney: R052376421830</string>
+	<string name="wifihomenet">Wifi домашняя сеть</string>
 
 </resources>
