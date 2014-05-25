@@ -1,4 +1,4 @@
-package ru.galakart.majordroid;
+п»їpackage ru.galakart.majordroid;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
@@ -17,7 +17,7 @@ import android.widget.Toast;
 
 public class ControsActivity extends Activity {
 	private WebView webPost;
-	private String serverURL, login, passw;
+	private String serverURL, login, passw, pathScripts = "";
 	private boolean outAccess = false;
 	private SharedPreferences prefs;
 	private TextView textView_legend;
@@ -29,12 +29,13 @@ public class ControsActivity extends Activity {
 		SharedPreferences prefs = PreferenceManager
 				.getDefaultSharedPreferences(this);
 		String vid = prefs.getString(getString(R.string.vid), "");
-		if (vid.contains("Обычный")) {
+		pathScripts = prefs.getString(getString(R.string.path_scripts), "");
+		if (vid.contains("РћР±С‹С‡РЅС‹Р№")) {
 			getWindow().addFlags(
 					WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
 			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		}
-		if (vid.contains("Полноэкранный")) {
+		if (vid.contains("РџРѕР»РЅРѕСЌРєСЂР°РЅРЅС‹Р№")) {
 			getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 			getWindow().clearFlags(
 					WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
@@ -87,10 +88,10 @@ public class ControsActivity extends Activity {
 		scriptnames[6] = prefs.getString(getString(R.string.scriptname7), "");
 		scriptnames[7] = prefs.getString(getString(R.string.scriptname8), "");
 		scriptnames[8] = prefs.getString(getString(R.string.scriptname9), "");
-		if (dostup.contains("Локальный")) {
+		if (dostup.contains("Р›РѕРєР°Р»СЊРЅС‹Р№")) {
 			outAccess = false;
 			serverURL = localURL;
-		} else if (dostup.contains("Глобальный")) {
+		} else if (dostup.contains("Р“Р»РѕР±Р°Р»СЊРЅС‹Р№")) {
 			outAccess = true;
 			serverURL = globalURL;
 		}
@@ -99,7 +100,7 @@ public class ControsActivity extends Activity {
 			if (scriptnames[i] != "")
 				legend += i + 1 + ". " + scriptnames[i] + ".\n";
 			else
-				legend += i + 1 + ". Скрипт не задан.\n";
+				legend += i + 1 + ". РЎРєСЂРёРїС‚ РЅРµ Р·Р°РґР°РЅ.\n";
 		}
 		textView_legend.setText(legend);
 	}
@@ -177,8 +178,8 @@ public class ControsActivity extends Activity {
 	}
 
 	public void scriptExec(String script) {
-		webPost.loadUrl("http://" + serverURL + "/objects/?script=" + script);
-		Toast toast = Toast.makeText(getApplicationContext(), "Скрипт "
+		webPost.loadUrl("http://" + serverURL + pathScripts + script);
+		Toast toast = Toast.makeText(getApplicationContext(), "РЎРєСЂРёРїС‚ "
 				+ script, Toast.LENGTH_LONG);
 		toast.setGravity(Gravity.BOTTOM, 0, 0);
 		toast.show();
@@ -188,7 +189,7 @@ public class ControsActivity extends Activity {
 		Toast toast = Toast
 				.makeText(
 						getApplicationContext(),
-						"Кнопка не привязана к скрипту.\nЗадайте имя скрипта в настройках",
+						"РљРЅРѕРїРєР° РЅРµ РїСЂРёРІСЏР·Р°РЅР° Рє СЃРєСЂРёРїС‚Сѓ.\nР—Р°РґР°Р№С‚Рµ РёРјСЏ СЃРєСЂРёРїС‚Р° РІ РЅР°СЃС‚СЂРѕР№РєР°С…",
 						Toast.LENGTH_LONG);
 		toast.setGravity(Gravity.BOTTOM, 0, 0);
 		toast.show();

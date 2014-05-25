@@ -1,4 +1,4 @@
-package ru.galakart.majordroid;
+п»їpackage ru.galakart.majordroid;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -27,13 +27,13 @@ public class Prefs extends PreferenceActivity {
 				.getDefaultSharedPreferences(this);
 		String vid = prefs.getString(getString(R.string.vid), "");
 
-		if (vid.contains("Обычный")) {
+		if (vid.contains("РћР±С‹С‡РЅС‹Р№")) {
 			getWindow().addFlags(
 					WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
 			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		}
 
-		if (vid.contains("Полноэкранный")) {
+		if (vid.contains("РџРѕР»РЅРѕСЌРєСЂР°РЅРЅС‹Р№")) {
 			getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 			getWindow().clearFlags(
 					WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
@@ -51,17 +51,17 @@ public class Prefs extends PreferenceActivity {
 			@Override
 			public boolean onPreferenceClick(Preference arg0) {
 				ad = new AlertDialog.Builder(Prefs.this);
-				ad.setTitle("Выбор домашней Wifi-сети"); // заголовок
+				ad.setTitle("Р’С‹Р±РѕСЂ РґРѕРјР°С€РЅРµР№ Wifi-СЃРµС‚Рё"); // Р·Р°РіРѕР»РѕРІРѕРє
 				if (tmpPrefSSID == "")
-					ad.setMessage("Установить домашнюю сеть на " + currentSSID
+					ad.setMessage("РЈСЃС‚Р°РЅРѕРІРёС‚СЊ РґРѕРјР°С€РЅСЋСЋ СЃРµС‚СЊ РЅР° " + currentSSID
 							+ " ?");
 				else
-					ad.setMessage("Текущая домашняя сеть: " + tmpPrefSSID
-							+ "\nПоменять её на " + currentSSID + " ?");
-				ad.setPositiveButton("Сохранить", new OnClickListener() {
+					ad.setMessage("РўРµРєСѓС‰Р°СЏ РґРѕРјР°С€РЅСЏСЏ СЃРµС‚СЊ: " + tmpPrefSSID
+							+ "\nРџРѕРјРµРЅСЏС‚СЊ РµС‘ РЅР° " + currentSSID + " ?");
+				ad.setPositiveButton("РЎРѕС…СЂР°РЅРёС‚СЊ", new OnClickListener() {
 					public void onClick(DialogInterface dialog, int arg1) {
 						Toast toast = Toast.makeText(getApplicationContext(),
-								"Сеть " + currentSSID + " сохранена",
+								"РЎРµС‚СЊ " + currentSSID + " СЃРѕС…СЂР°РЅРµРЅР°",
 								Toast.LENGTH_SHORT);
 						toast.setGravity(Gravity.BOTTOM, 0, 0);
 						Editor editor = prefs.edit();
@@ -70,7 +70,7 @@ public class Prefs extends PreferenceActivity {
 							toast.show();
 					}
 				});
-				ad.setNegativeButton("Отмена", new OnClickListener() {
+				ad.setNegativeButton("РћС‚РјРµРЅР°", new OnClickListener() {
 					public void onClick(DialogInterface dialog, int arg1) {
 						// none
 					}
@@ -83,11 +83,11 @@ public class Prefs extends PreferenceActivity {
 						AlertDialog.Builder albuilder = new AlertDialog.Builder(
 								Prefs.this);
 						albuilder
-								.setTitle("Сообщение")
+								.setTitle("РЎРѕРѕР±С‰РµРЅРёРµ")
 								.setMessage(
-										"Текущая WiFi-сеть совпадает с занесённой в память. Для записи другой домашней сети, подключитесь к ней.")
+										"РўРµРєСѓС‰Р°СЏ WiFi-СЃРµС‚СЊ СЃРѕРІРїР°РґР°РµС‚ СЃ Р·Р°РЅРµСЃС‘РЅРЅРѕР№ РІ РїР°РјСЏС‚СЊ. Р”Р»СЏ Р·Р°РїРёСЃРё РґСЂСѓРіРѕР№ РґРѕРјР°С€РЅРµР№ СЃРµС‚Рё, РїРѕРґРєР»СЋС‡РёС‚РµСЃСЊ Рє РЅРµР№.")
 								.setCancelable(false)
-								.setNegativeButton("Назад",
+								.setNegativeButton("РќР°Р·Р°Рґ",
 										new DialogInterface.OnClickListener() {
 											public void onClick(
 													DialogInterface dialog,
@@ -104,10 +104,10 @@ public class Prefs extends PreferenceActivity {
 					AlertDialog.Builder albuilder = new AlertDialog.Builder(
 							Prefs.this);
 					albuilder
-							.setTitle("Важное сообщение!")
-							.setMessage("WiFi выключен или нет соединения")
+							.setTitle("Р’Р°Р¶РЅРѕРµ СЃРѕРѕР±С‰РµРЅРёРµ!")
+							.setMessage("WiFi РІС‹РєР»СЋС‡РµРЅ РёР»Рё РЅРµС‚ СЃРѕРµРґРёРЅРµРЅРёСЏ")
 							.setCancelable(false)
-							.setNegativeButton("Назад",
+							.setNegativeButton("РќР°Р·Р°Рґ",
 									new DialogInterface.OnClickListener() {
 										public void onClick(
 												DialogInterface dialog, int id) {
@@ -121,6 +121,25 @@ public class Prefs extends PreferenceActivity {
 				return true;
 			}
 		});
+
+//		Preference button_path_default = (Preference) findPreference("button_path_default");
+//		button_path_default.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+//			@Override
+//			public boolean onPreferenceClick(Preference arg0) {
+//				Editor editor = prefs.edit();
+//				editor.putString("path_homepage", "/menu.html");
+//				editor.putString("path_scripts", "/objects/?script=");
+//				editor.putString("path_voice", "/command.php?qry=");
+//				editor.putString("path_gps", "/gps.php");
+//				Toast toast = Toast.makeText(getApplicationContext(),
+//						"РЈРјРѕР»С‡Р°РЅРёСЏ РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅС‹",
+//						Toast.LENGTH_SHORT);
+//				toast.setGravity(Gravity.BOTTOM, 0, 0);
+//				if (editor.commit())
+//					toast.show();
+//				return true;
+//			}
+//		});
 
 	}
 }

@@ -9,5 +9,11 @@
     <string-array name="vid">
 		<item>Обычный</item>
 		<item>Полноэкранный</item>
+		<item>Полноэкранный (без панели кнопок)</item>
+	</string-array>
+	
+    <string-array name="gps">
+		<item>Выкл</item>
+		<item>Вкл</item>
 	</string-array>
 </resources>

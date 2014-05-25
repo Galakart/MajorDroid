@@ -1,4 +1,4 @@
-package ru.galakart.majordroid;
+п»їpackage ru.galakart.majordroid;
 
 import android.net.Uri;
 import android.os.Bundle;
@@ -19,13 +19,13 @@ public class AboutActivity extends Activity {
 		SharedPreferences prefs = PreferenceManager
 				.getDefaultSharedPreferences(this);
 		String vid = prefs.getString(getString(R.string.vid), "");
-		if (vid.contains("Обычный")) {
+		if (vid.contains("РћР±С‹С‡РЅС‹Р№")) {
 			getWindow().addFlags(
 					WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
 			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		}
 
-		if (vid.contains("Полноэкранный")) {
+		if (vid.contains("РџРѕР»РЅРѕСЌРєСЂР°РЅРЅС‹Р№")) {
 			getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 			getWindow().clearFlags(
 					WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);

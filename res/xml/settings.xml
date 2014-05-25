@@ -29,11 +29,33 @@
             android:key="@string/globalUrl"
             android:summary="@string/globalUrl_summary"
             android:title="@string/globalUrl" />
-        <Preference android:title="Домашняя WiFi-сеть"
-                android:key="button"
-                android:summary="Для автоматического переключения адреса сервера"/>
-    </PreferenceCategory>
 
+        <Preference
+            android:key="button"
+            android:summary="Для автоматического переключения адреса сервера"
+            android:title="Домашняя WiFi-сеть" />
+
+        <PreferenceScreen
+            android:summary="Пути к домашней странице и скриптам. Не изменять без надобности"
+            android:title="Системные пути" >
+            <EditTextPreference
+                android:defaultValue="/menu.html"
+                android:key="@string/path_homepage"
+                android:title="@string/path_homepage" />
+            <EditTextPreference
+                android:defaultValue="/objects/?script="
+                android:key="@string/path_scripts"
+                android:title="@string/path_scripts" />
+            <EditTextPreference
+                android:defaultValue="/command.php?qry="
+                android:key="@string/path_voice"
+                android:title="@string/path_voice" />
+            <EditTextPreference
+                android:defaultValue="/gps.php"
+                android:key="@string/path_tracker"
+                android:title="@string/path_tracker" />
+        </PreferenceScreen>
+    </PreferenceCategory>
     <PreferenceCategory android:title="Пользователь" >
         <EditTextPreference
             android:dialogTitle="Логин:"
@@ -47,10 +69,30 @@
             android:summary="@string/passw_summary"
             android:title="@string/passw" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="Настройка пульта управления" >
+    <PreferenceCategory android:title="Сервисы" >
+        <PreferenceScreen
+            android:summary="Отсылка GPS-координат на домашний сервер"
+            android:title="GPS-трекер" >
+            <ListPreference
+                android:defaultValue="Выкл"
+                android:dialogTitle="Трекер"
+                android:entries="@array/gps"
+                android:entryValues="@array/gps"
+                android:key="@string/gps_switch"
+                android:summary="Вкл/выкл"
+                android:title="@string/gps_switch" />
+
+            <EditTextPreference
+                android:defaultValue="5"
+                android:dialogTitle="@string/gps_period_title"
+                android:inputType="number"
+                android:key="@string/gps_period"
+                android:summary="@string/gps_period_title"
+                android:title="@string/gps_period" />
+        </PreferenceScreen>
         <PreferenceScreen
             android:summary="Устанавливает выполнение скриптов MajorDomo на выбранные кнопки"
-            android:title="Привязка кнопок" >
+            android:title="Привязка кнопок пульта" >
             <PreferenceCategory android:title="Привяжите выбранную кнопку на скрипт MajorDomo" >
                 <EditTextPreference
                     android:dialogTitle="@string/scriptdialog"
