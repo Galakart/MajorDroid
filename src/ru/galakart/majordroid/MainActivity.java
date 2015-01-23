@@ -5,6 +5,19 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketException;
+import java.util.Enumeration;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -19,6 +32,7 @@ import android.location.LocationManager;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -39,6 +53,7 @@ import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 import android.widget.TableLayout;
 import android.widget.Toast;
+import android.util.Log;
 
 public class MainActivity extends Activity {
 
@@ -52,10 +67,12 @@ public class MainActivity extends Activity {
 	private boolean outAccess = false;
 	private boolean firstLoad = false;
 	private static final int REQUEST_CODE = 1234;
+	private static final int VOICE_INPUT_TIMIOUT_MILLIS = 30000;
 	private String gpsTimeOut;
 	private Timer timer;
 	private TimerTask doAsynchronousTask;
 	private boolean timerOn = false;
+	private final int TCP_SERVER_PORT = 7999; //Define the server port
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -98,6 +115,8 @@ public class MainActivity extends Activity {
             }
         };
         
+        
+        
         SharedPreferences prefs = PreferenceManager
 				.getDefaultSharedPreferences(this);
 		gpsTimeOut = prefs.getString(getString(R.string.gps_period), "5");
@@ -106,6 +125,33 @@ public class MainActivity extends Activity {
 					Long.parseLong(gpsTimeOut) * 60 * 1000);
 			timerOn = true;
 		}
+		
+		  //New thread to listen to incoming connections
+		  new Thread(new Runnable() {
+		 
+		   @Override
+		   public void run() {
+		    try {
+		     //Create a server socket object and bind it to a port
+		     ServerSocket socServer = new ServerSocket(TCP_SERVER_PORT);
+		     //Create server side client socket reference
+		     Socket socClient = null;
+		     //Infinite loop will listen for client requests to connect
+		     while (true) {
+		      //Accept the client connection and hand over communication to server side client socket
+		      socClient = socServer.accept();
+		      //For each client new instance of AsyncTask will be created
+		      ServerAsyncTask serverAsyncTask = new ServerAsyncTask();
+		      //Start the AsyncTask execution
+		      //Accepted client socket object will pass as the parameter
+		      serverAsyncTask.execute(new Socket[] {socClient});
+		     }
+		    } catch (IOException e) {
+		     e.printStackTrace();
+		    }
+		   }
+		  }).start();	
+		
 	}
 
 	@Override
@@ -155,7 +201,54 @@ public class MainActivity extends Activity {
 		}
 		super.onActivityResult(requestCode, resultCode, data);
 	}
-
+	
+	/**
+	 * AsyncTask which handles the commiunication with clients
+	 */
+	 public class ServerAsyncTask extends AsyncTask<Socket, Void, String> {
+	  //Background task which serve for the client
+	  @Override
+	  protected String doInBackground(Socket... params) {
+	   String result = null;
+	   //Get the accepted socket object
+	   Socket mySocket = params[0];
+	   try {
+	    //Get the data input stream comming from the client
+	    InputStream is = mySocket.getInputStream();
+	    //Get the output stream to the client
+	    PrintWriter out = new PrintWriter(
+	      mySocket.getOutputStream(), true);
+	    //Write data to the data output stream
+	    //out.println("Hello from server");
+	    //Buffer the data input stream
+	    BufferedReader br = new BufferedReader(
+	      new InputStreamReader(is));
+	    //Read the contents of the data buffer
+	    result = br.readLine();
+	    //Close the client connection
+	    mySocket.close();
+	   } catch (IOException e) {
+	    e.printStackTrace();
+	   }
+	   return result;
+	  }
+	 
+	  @Override
+	  protected void onPostExecute(String s) {
+	   //After finishing the execution of background task data will be write the text view
+	   //tvClientMsg.setText(s);
+		Toast toast = Toast.makeText(getApplicationContext(),
+				s, Toast.LENGTH_SHORT);
+		toast.setGravity(Gravity.BOTTOM, 0, 0);
+		toast.show();
+		
+		if (s.equals("hi")) {
+			imgb_voice_click(null);	
+		}
+		
+	  }
+	 }
+	
 	public class MajorDroidWebViewer extends WebViewClient {
 		@Override
 		public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -314,10 +407,19 @@ public class MainActivity extends Activity {
 			toast.show();
 		} else {
 			Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-			intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-					RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+			intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
 			intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Говорите...");
+			intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, getClass().getPackage().getName());			
 			startActivityForResult(intent, REQUEST_CODE);
+			
+			new android.os.Handler().postDelayed(
+				    new Runnable() {
+				        public void run() {
+				            finishActivity(REQUEST_CODE);
+				        }
+				    }, 
+			    VOICE_INPUT_TIMIOUT_MILLIS);			
+			
 		}
 	}
 
