@@ -11,6 +11,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
+import java.io.File;
+
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Queue;
+import java.util.UUID;
+
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.ServerSocket;
@@ -34,6 +43,7 @@ import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.preference.PreferenceManager;
@@ -55,7 +65,22 @@ import android.widget.TableLayout;
 import android.widget.Toast;
 import android.util.Log;
 
-public class MainActivity extends Activity {
+import android.media.AudioManager;
+import android.media.ToneGenerator;
+
+import com.example.recognizer.DataFiles;
+import com.example.recognizer.Grammar;
+import com.example.recognizer.PhonMapper;
+
+import org.apache.commons.io.FileUtils;
+
+import edu.cmu.pocketsphinx.Hypothesis;
+import edu.cmu.pocketsphinx.RecognitionListener;
+import edu.cmu.pocketsphinx.SpeechRecognizer;
+import edu.cmu.pocketsphinx.SpeechRecognizerSetup;
+
+
+public class MainActivity extends Activity implements RecognitionListener {
 
 	private WebView mWebView;
 	private WebView webPost;
@@ -73,6 +98,22 @@ public class MainActivity extends Activity {
 	private TimerTask doAsynchronousTask;
 	private boolean timerOn = false;
 	private final int TCP_SERVER_PORT = 7999; //Define the server port
+
+    private static final String TAG = "Recognizer";
+
+    private static final String COMMAND_SEARCH = "command";
+    private static final String KWS_SEARCH = "hotword";
+
+    private final Handler mHandler = new Handler();
+    private final Queue<String> mSpeechQueue = new LinkedList<String>();
+    private SpeechRecognizer mRecognizer;    
+	
+    private final Runnable mStopRecognitionCallback = new Runnable() {
+        @Override
+        public void run() {
+            stopRecognition();
+        }
+    };
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -150,9 +191,173 @@ public class MainActivity extends Activity {
 		     e.printStackTrace();
 		    }
 		   }
-		  }).start();	
-		
+		  }).start();
+		  
+		  setupRecognizer();
 	}
+	
+    @Override
+    protected void onDestroy() {
+        if (mRecognizer != null) mRecognizer.cancel();
+        super.onDestroy();
+    }
+    
+    private void setupRecognizer() {
+        final String hotword = getString(R.string.hotword);
+        new AsyncTask<Void, Void, Exception>() {
+            @Override
+            protected Exception doInBackground(Void... params) {
+                try {
+                	/*
+                    List<Device> devices = mController.getDevices();
+                    final String[] names = new String[devices.size()];
+                    for (int i = 0; i < names.length; i++) {
+                        names[i] = devices.get(i).name;
+                    }
+                    */
+
+            	
+                	
+                	final String[] names = new String[1];               	
+                	names[0]=hotword;
+                    PhonMapper phonMapper = new PhonMapper(getAssets().open("dict/ru/hotwords"));
+                    Grammar grammar = new Grammar(names, phonMapper);
+                    grammar.addWords(hotword);
+                    
+                    DataFiles dataFiles = new DataFiles(getPackageName(), "ru");
+                    File hmmDir = new File(dataFiles.getHmm());
+                    File dict = new File(dataFiles.getDict());
+                    File jsgf = new File(dataFiles.getJsgf());
+           		    copyAssets(hmmDir);                       
+                    saveFile(jsgf, grammar.getJsgf());
+                    saveFile(dict, grammar.getDict());
+                   
+           		    Log.d(TAG, "Recognizer initiate");            		                     
+                    mRecognizer = SpeechRecognizerSetup.defaultSetup()
+                            .setAcousticModel(hmmDir)
+                            .setDictionary(dict)
+                            .setBoolean("-remove_noise", false)
+                            .setKeywordThreshold(1e-7f)
+                            .getRecognizer();
+                            
+           		    Log.d(TAG, "Add keyphrase search");                    
+                    mRecognizer.addKeyphraseSearch(KWS_SEARCH, hotword);
+                    //Log.d(TAG, "Add grammar search");                    
+                    //mRecognizer.addGrammarSearch(COMMAND_SEARCH, jsgf);
+                } catch (IOException e) {
+                    return e;
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Exception ex) {
+                if (ex != null) {
+                    onRecognizerSetupError(ex);
+                } else {
+                    onRecognizerSetupComplete();
+                }
+            }
+        }.execute();
+    }
+    
+    private void onRecognizerSetupComplete() {
+        Toast.makeText(this, "Ready", Toast.LENGTH_SHORT).show();
+        mRecognizer.addListener(this);
+        mRecognizer.startListening(KWS_SEARCH);
+    }
+
+    private void onRecognizerSetupError(Exception ex) {
+        Toast.makeText(this, ex.getMessage(), Toast.LENGTH_LONG).show();
+    }
+
+    private void copyAssets(File baseDir) throws IOException {
+        String[] files = getAssets().list("hmm/ru");
+
+        for (String fromFile : files) {
+            File toFile = new File(baseDir.getAbsolutePath() + "/" + fromFile);
+            InputStream in = getAssets().open("hmm/ru/" + fromFile);
+            FileUtils.copyInputStreamToFile(in, toFile);
+        }
+    }
+
+    private void saveFile(File f, String content) throws IOException {
+        File dir = f.getParentFile();
+        if (!dir.exists() && !dir.mkdirs()) {
+            throw new IOException("Cannot create directory: " + dir);
+        }
+        FileUtils.writeStringToFile(f, content, "UTF8");
+    }
+
+    @Override
+    public void onBeginningOfSpeech() {
+        Log.d(TAG, "onBeginningOfSpeech");
+    }
+
+    @Override
+    public void onEndOfSpeech() {
+        Log.d(TAG, "onEndOfSpeech");
+        if (mRecognizer.getSearchName().equals(COMMAND_SEARCH)) {
+            mRecognizer.stop();
+        }
+    }
+
+    @Override
+    public void onPartialResult(Hypothesis hypothesis) {
+        if (hypothesis == null) return;
+        String text = hypothesis.getHypstr();
+        if (KWS_SEARCH.equals(mRecognizer.getSearchName())) {
+            startRecognition();
+        } else {
+            Log.d(TAG, text);
+        }
+    }
+
+    @Override
+    public void onResult(Hypothesis hypothesis) {
+        mHandler.removeCallbacks(mStopRecognitionCallback);
+        String text = hypothesis != null ? hypothesis.getHypstr() : null;
+        Log.d(TAG, "onResult " + text);
+        if (text != null) {
+            Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
+            process(text);
+        }
+        if (COMMAND_SEARCH.equals(mRecognizer.getSearchName())) {
+            mRecognizer.startListening(KWS_SEARCH);
+        }
+    }
+
+    private void startStopRecognition() {
+        if (mRecognizer == null) return;
+        if (KWS_SEARCH.equals(mRecognizer.getSearchName())) {
+            startRecognition();
+        } else {
+            stopRecognition();
+        }
+    }
+
+    private synchronized void startRecognition() {
+        if (mRecognizer == null || COMMAND_SEARCH.equals(mRecognizer.getSearchName())) return;
+        mRecognizer.cancel();
+        imgb_voice_click(null);
+        /*
+        new ToneGenerator(AudioManager.STREAM_MUSIC, ToneGenerator.MAX_VOLUME).startTone(ToneGenerator.TONE_CDMA_PIP, 200);
+        post(400, new Runnable() {
+            @Override
+            public void run() {
+                //mRecognizer.startListening(COMMAND_SEARCH, 3000);
+                Log.d(TAG, "Listen commands");
+                extCommand("hi");
+                //post(4000, mStopRecognitionCallback);
+            }
+        });
+        */
+    }
+
+    private synchronized void stopRecognition() {
+        if (mRecognizer == null || KWS_SEARCH.equals(mRecognizer.getSearchName())) return;
+        mRecognizer.stop();
+    }    
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -162,6 +367,14 @@ public class MainActivity extends Activity {
 		}
 		return super.onKeyDown(keyCode, event);
 	}
+
+    private void post(long delay, Runnable task) {
+        mHandler.postDelayed(task, delay);
+    }
+
+    private void process(final String text) {
+    }
+	
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -237,15 +450,7 @@ public class MainActivity extends Activity {
 	  protected void onPostExecute(String s) {
 	   //After finishing the execution of background task data will be write the text view
 	   //tvClientMsg.setText(s);
-		Toast toast = Toast.makeText(getApplicationContext(),
-				s, Toast.LENGTH_SHORT);
-		toast.setGravity(Gravity.BOTTOM, 0, 0);
-		toast.show();
-		
-		if (s.equals("hi")) {
-			imgb_voice_click(null);	
-		}
-		
+		extCommand(s);	
 	  }
 	 }
 	
@@ -384,12 +589,28 @@ public class MainActivity extends Activity {
 		}		
     }
 
+	private void extCommand(String command) {
+
+		
+		if (command.equals("hi")) {
+			imgb_voice_click(null);	
+		}
+		
+		Toast toast = Toast.makeText(getApplicationContext(),
+				command, Toast.LENGTH_SHORT);
+		toast.setGravity(Gravity.BOTTOM, 0, 0);
+		toast.show();		
+	}
+	
 	private void voiceCommand(String command) {
+		webPost.loadUrl("http://" + serverURL + pathVoice + command);
 		Toast toast = Toast.makeText(getApplicationContext(), command,
 				Toast.LENGTH_LONG);
 		toast.setGravity(Gravity.BOTTOM, 0, 0);
-		toast.show();
-		webPost.loadUrl("http://" + serverURL + pathVoice + command);
+		toast.show();		
+        mRecognizer.cancel();
+        mRecognizer.startListening(KWS_SEARCH);
+		
 	}
 
 	public void imgb_home_click(View v) {
@@ -416,6 +637,8 @@ public class MainActivity extends Activity {
 				    new Runnable() {
 				        public void run() {
 				            finishActivity(REQUEST_CODE);
+			                mRecognizer.cancel();
+			                mRecognizer.startListening(KWS_SEARCH);
 				        }
 				    }, 
 			    VOICE_INPUT_TIMIOUT_MILLIS);			
