@@ -21,6 +21,9 @@
     <string name="vid">Интерфейс</string>
     <string name="vid_summary">Обычный или полноэкранный</string>
     <string name="gps_switch">GPS-трекер</string>
+    <string name="voice_switch">Голосовая активация</string>
+    <string name="voice_phrase">Фраза активации</string>
+    <string name="voice_proximity">Активация при приближении</string>    
     <string name="gps_period_title">Периодичность отправки координат (в мин.)</string>
     <string name="gps_period">Периодичность</string>
     <string name="path_homepage">Домашняя страница</string>
@@ -43,5 +46,6 @@
     <string name="about_url">v1.3b http://smartliving.ru</string>
     <string name="about_donate">Приложение для управления сервером умного дома MajorDomo.\n\nЛицензия Beerware - каждый довольный пользователь может выпить пива в честь автора android-приложения, или поддержать материально:\nWebMoney: R052376421830</string>
 	<string name="wifihomenet">Wifi домашняя сеть</string>
+	<string name="hotword">проснись</string>
 
 </resources>
