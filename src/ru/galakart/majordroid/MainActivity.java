@@ -25,7 +25,10 @@ import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.URI;
+import java.net.URLEncoder;
 import java.util.Enumeration;
+import java.net.URLEncoder;
 
 import android.app.Activity;
 import android.content.Context;
@@ -38,6 +41,7 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
@@ -47,6 +51,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.provider.Settings.Secure;
 import android.speech.RecognizerIntent;
 import android.view.Gravity;
@@ -64,6 +69,13 @@ import android.widget.ProgressBar;
 import android.widget.TableLayout;
 import android.widget.Toast;
 import android.util.Log;
+import android.util.Base64;
+
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+
 
 import android.media.AudioManager;
 import android.media.ToneGenerator;
@@ -73,6 +85,14 @@ import com.example.recognizer.Grammar;
 import com.example.recognizer.PhonMapper;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.http.HttpResponse; 
+import org.apache.http.NameValuePair; 
+import org.apache.http.client.HttpClient; 
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost; 
+import org.apache.http.impl.client.DefaultHttpClient; 
+import org.apache.http.message.BasicNameValuePair;
 
 import edu.cmu.pocketsphinx.Hypothesis;
 import edu.cmu.pocketsphinx.RecognitionListener;
@@ -80,7 +100,7 @@ import edu.cmu.pocketsphinx.SpeechRecognizer;
 import edu.cmu.pocketsphinx.SpeechRecognizerSetup;
 
 
-public class MainActivity extends Activity implements RecognitionListener {
+public class MainActivity extends Activity implements RecognitionListener, SensorEventListener {
 
 	private WebView mWebView;
 	private WebView webPost;
@@ -89,14 +109,21 @@ public class MainActivity extends Activity implements RecognitionListener {
 			passw = "", wifiHomeNet = "", pathHomepage = "", pathVoice = "", pathGps = "";
 	private String tmpDostupAccess = "";
 	private String tmpAdressAccess = "";
+	private String VoiceHotWord = "";
 	private boolean outAccess = false;
 	private boolean firstLoad = false;
-	private static final int REQUEST_CODE = 1234;
-	private static final int VOICE_INPUT_TIMIOUT_MILLIS = 30000;
+	private static final int REQUEST_CODE_VOICE = 1234;
+	private static final int REQUEST_CODE_VIDEO = 1235;
+	private static final int VOICE_INPUT_TIMIOUT_MILLIS = 10000;
 	private String gpsTimeOut;
 	private Timer timer;
 	private TimerTask doAsynchronousTask;
+	private Handler delayHandler;
 	private boolean timerOn = false;
+	private boolean voiceProximityEnable = false;
+	private boolean voiceKeywordEnable = false;
+	private boolean voiceKeywordWorking = false;
+	private boolean voiceGoogleInProgress = false;
 	private final int TCP_SERVER_PORT = 7999; //Define the server port
 
     private static final String TAG = "Recognizer";
@@ -106,7 +133,12 @@ public class MainActivity extends Activity implements RecognitionListener {
 
     private final Handler mHandler = new Handler();
     private final Queue<String> mSpeechQueue = new LinkedList<String>();
-    private SpeechRecognizer mRecognizer;    
+    private SpeechRecognizer mRecognizer;
+    
+    private SensorManager mSensorManager;
+    private float mSensorMaximum;
+    private float mSensorValue;
+    
 	
     private final Runnable mStopRecognitionCallback = new Runnable() {
         @Override
@@ -192,18 +224,44 @@ public class MainActivity extends Activity implements RecognitionListener {
 		    }
 		   }
 		  }).start();
+
 		  
-		  setupRecognizer();
+			if ((prefs.getString(getString(R.string.voice_proximity), "Выкл").equals("Вкл"))) {
+				voiceProximityEnable=true;	
+			} else {
+				voiceProximityEnable=false;				
+			}
+		  
+
+			if ((prefs.getString(getString(R.string.voice_switch), "Выкл").equals("Вкл"))) {
+				voiceKeywordEnable=true;	
+			} else {
+				voiceKeywordEnable=false;				
+			}
+			VoiceHotWord=prefs.getString(getString(R.string.voice_phrase), "проснись");
+			if (voiceKeywordEnable) {
+			 setupRecognizer();
+			}
+			
+	        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+	        Sensor sensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+	        if (sensor != null) {
+	            mSensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_FASTEST);
+	            mSensorMaximum = sensor.getMaximumRange();
+	        }
+			delayHandler=new android.os.Handler();
+
 	}
 	
     @Override
     protected void onDestroy() {
         if (mRecognizer != null) mRecognizer.cancel();
+        mSensorManager.unregisterListener(this);        
         super.onDestroy();
     }
     
     private void setupRecognizer() {
-        final String hotword = getString(R.string.hotword);
+
         new AsyncTask<Void, Void, Exception>() {
             @Override
             protected Exception doInBackground(Void... params) {
@@ -219,10 +277,10 @@ public class MainActivity extends Activity implements RecognitionListener {
             	
                 	
                 	final String[] names = new String[1];               	
-                	names[0]=hotword;
+                	names[0]=VoiceHotWord;
                     PhonMapper phonMapper = new PhonMapper(getAssets().open("dict/ru/hotwords"));
                     Grammar grammar = new Grammar(names, phonMapper);
-                    grammar.addWords(hotword);
+                    grammar.addWords(VoiceHotWord);
                     
                     DataFiles dataFiles = new DataFiles(getPackageName(), "ru");
                     File hmmDir = new File(dataFiles.getHmm());
@@ -239,9 +297,11 @@ public class MainActivity extends Activity implements RecognitionListener {
                             .setBoolean("-remove_noise", false)
                             .setKeywordThreshold(1e-7f)
                             .getRecognizer();
+
+                     Log.d(TAG, "Add keyphrase search");                    
+                     mRecognizer.addKeyphraseSearch(KWS_SEARCH, VoiceHotWord);   		
                             
-           		    Log.d(TAG, "Add keyphrase search");                    
-                    mRecognizer.addKeyphraseSearch(KWS_SEARCH, hotword);
+                  
                     //Log.d(TAG, "Add grammar search");                    
                     //mRecognizer.addGrammarSearch(COMMAND_SEARCH, jsgf);
                 } catch (IOException e) {
@@ -262,13 +322,15 @@ public class MainActivity extends Activity implements RecognitionListener {
     }
     
     private void onRecognizerSetupComplete() {
-        Toast.makeText(this, "Ready", Toast.LENGTH_SHORT).show();
-        mRecognizer.addListener(this);
-        mRecognizer.startListening(KWS_SEARCH);
+         voiceKeywordWorking=true;    	
+         Toast.makeText(this, "Activation: \""+VoiceHotWord+"\"", Toast.LENGTH_SHORT).show();
+         mRecognizer.addListener(this);         
+         mRecognizer.startListening(KWS_SEARCH);
     }
 
     private void onRecognizerSetupError(Exception ex) {
         Toast.makeText(this, ex.getMessage(), Toast.LENGTH_LONG).show();
+        voiceKeywordWorking=false;
     }
 
     private void copyAssets(File baseDir) throws IOException {
@@ -338,7 +400,6 @@ public class MainActivity extends Activity implements RecognitionListener {
 
     private synchronized void startRecognition() {
         if (mRecognizer == null || COMMAND_SEARCH.equals(mRecognizer.getSearchName())) return;
-        mRecognizer.cancel();
         imgb_voice_click(null);
         /*
         new ToneGenerator(AudioManager.STREAM_MUSIC, ToneGenerator.MAX_VOLUME).startTone(ToneGenerator.TONE_CDMA_PIP, 200);
@@ -357,8 +418,31 @@ public class MainActivity extends Activity implements RecognitionListener {
     private synchronized void stopRecognition() {
         if (mRecognizer == null || KWS_SEARCH.equals(mRecognizer.getSearchName())) return;
         mRecognizer.stop();
+        voiceKeywordWorking=false;
     }    
 
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+    	if (!voiceProximityEnable) return;
+        mSensorValue = event.values[0];
+        if (mSensorValue < mSensorMaximum) {
+            post(500, new Runnable() {
+                @Override
+                public void run() {
+                    if ((mSensorValue < mSensorMaximum)) {
+                        //startRecognition();
+                    	imgb_voice_click(null);
+                    }
+                }
+            });
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    }
+    
+    
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if ((keyCode == KeyEvent.KEYCODE_BACK) && mWebView.canGoBack()) {
@@ -393,6 +477,11 @@ public class MainActivity extends Activity implements RecognitionListener {
 
 		case R.id.action_quit:
 		    timer.cancel();
+		    if (mRecognizer != null) {
+		    	mRecognizer.stop();
+		    	mRecognizer.cancel();
+		    }
+		    		    
 			finish();
 			return true;
 			
@@ -407,11 +496,26 @@ public class MainActivity extends Activity implements RecognitionListener {
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
+		delayHandler.removeCallbacksAndMessages(null);		
+		if (requestCode == REQUEST_CODE_VOICE && resultCode == RESULT_OK) {
 			ArrayList<String> matches = data
 					.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
 			voiceCommand(matches.get(0));
 		}
+		if (requestCode == REQUEST_CODE_VIDEO && resultCode == RESULT_OK) {
+			Uri videoUri = data.getData();
+			Toast toast = Toast.makeText(getApplicationContext(), videoUri.toString(),
+					Toast.LENGTH_LONG);
+			toast.setGravity(Gravity.BOTTOM, 0, 0);
+			toast.show();			
+		}		
+		
+		if (voiceKeywordEnable && !voiceKeywordWorking) {
+			voiceGoogleInProgress=false;			
+	        mRecognizer.cancel();
+	        mRecognizer.startListening(KWS_SEARCH);
+	        voiceKeywordWorking=true;
+		}		
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 	
@@ -457,8 +561,22 @@ public class MainActivity extends Activity implements RecognitionListener {
 	public class MajorDroidWebViewer extends WebViewClient {
 		@Override
 		public boolean shouldOverrideUrlLoading(WebView view, String url) {
-			view.loadUrl(url);
-			return true;
+			
+
+			
+			if (url.startsWith("app://")) {
+				
+				Toast toast = Toast.makeText(getApplicationContext(),
+						url, Toast.LENGTH_SHORT);
+				toast.setGravity(Gravity.BOTTOM, 0, 0);
+				toast.show();
+				String cmd=url;
+				cmd=cmd.replace("app://", "");
+				extCommand(cmd);
+			} else {
+				view.loadUrl(url);
+			}
+			return true;			
 		}
 
 		@Override
@@ -586,14 +704,49 @@ public class MainActivity extends Activity implements RecognitionListener {
 		} else if ((prefs.getString(getString(R.string.gps_switch), "Выкл").equals("Выкл")) && (timerOn)) {
 			timer.cancel();
 			timerOn = false;
-		}		
+		}
+	
+		if ((prefs.getString(getString(R.string.voice_proximity), "Выкл").equals("Вкл"))) {
+			voiceProximityEnable=true;	
+		} else {
+			voiceProximityEnable=false;				
+		}
+		
     }
 
 	private void extCommand(String command) {
 
 		
-		if (command.equals("hi")) {
+		if (command.equals("hi") || command.equals("voice")) {
 			imgb_voice_click(null);	
+		}
+		if (command.equals("settings")) {
+			imgb_settings_click(null);	
+		}		
+		if (command.equals("home")) {
+			imgb_home_click(null);	
+		}		
+		if (command.equals("pult")) {
+			imgb_pult_click(null);	
+		}
+		if (command.equals("videorecord")) {
+			   if (voiceKeywordWorking) {
+			        mRecognizer.cancel();
+			        mRecognizer.stop();
+			        voiceKeywordWorking=false;
+			   }
+
+			   Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+			    if (takeVideoIntent.resolveActivity(getPackageManager()) != null) {
+			        startActivityForResult(takeVideoIntent, REQUEST_CODE_VIDEO);
+			    }
+			    
+		}
+		
+		if (command.startsWith("url:")) {
+			String url=command;
+			url=url.replace("url:", "");
+			mWebView.loadUrl(url);
 		}
 		
 		Toast toast = Toast.makeText(getApplicationContext(),
@@ -604,12 +757,27 @@ public class MainActivity extends Activity implements RecognitionListener {
 	
 	private void voiceCommand(String command) {
 		webPost.loadUrl("http://" + serverURL + pathVoice + command);
-		Toast toast = Toast.makeText(getApplicationContext(), command,
+
+
+   		Toast toast = Toast.makeText(getApplicationContext(), command,
 				Toast.LENGTH_LONG);
 		toast.setGravity(Gravity.BOTTOM, 0, 0);
-		toast.show();		
-        mRecognizer.cancel();
-        mRecognizer.startListening(KWS_SEARCH);
+		toast.show();
+
+		
+/*		
+	    try{
+	           HttpClient httpclient = new DefaultHttpClient();
+	           HttpGet request = new HttpGet();
+	           String authorizationString = "Basic " + Base64.encodeToString((login + ":" + passw).getBytes(),Base64.NO_WRAP);	           
+	           request.setHeader("Authorization", authorizationString);
+	           URI website = new URI("http://" + serverURL + pathVoice + URLEncoder.encode(command,"UTF-8"));                     
+	           request.setURI(website);	                     	           
+	           httpclient.execute(request);
+	       }catch(Exception e){
+	           Log.e(TAG, "Error in http connection "+e.toString());
+	       }
+	*/	
 		
 	}
 
@@ -618,6 +786,9 @@ public class MainActivity extends Activity implements RecognitionListener {
 	}
 
 	public void imgb_voice_click(View v) {
+		
+		if (voiceGoogleInProgress) return;
+		
 		PackageManager pm = getPackageManager();
 		List<ResolveInfo> activities = pm.queryIntentActivities(new Intent(
 				RecognizerIntent.ACTION_RECOGNIZE_SPEECH), 0);
@@ -627,18 +798,33 @@ public class MainActivity extends Activity implements RecognitionListener {
 			toast.setGravity(Gravity.BOTTOM, 0, 0);
 			toast.show();
 		} else {
+
+			if (voiceKeywordWorking) {
+		        mRecognizer.cancel();
+		        mRecognizer.stop();
+		        voiceKeywordWorking=false;
+			}
+
+			voiceGoogleInProgress=true;
 			Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
 			intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
 			intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Говорите...");
 			intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, getClass().getPackage().getName());			
-			startActivityForResult(intent, REQUEST_CODE);
+			startActivityForResult(intent, REQUEST_CODE_VOICE);
 			
-			new android.os.Handler().postDelayed(
+
+			delayHandler.postDelayed(
 				    new Runnable() {
 				        public void run() {
-				            finishActivity(REQUEST_CODE);
-			                mRecognizer.cancel();
-			                mRecognizer.startListening(KWS_SEARCH);
+				        	if (voiceGoogleInProgress) {
+				             finishActivity(REQUEST_CODE_VOICE);
+				             voiceGoogleInProgress=false;
+				             if (voiceKeywordEnable) {
+			                  mRecognizer.cancel();
+			                  mRecognizer.startListening(KWS_SEARCH);
+			            	  voiceKeywordWorking=true;			                  
+				             }
+				        	}
 				        }
 				    }, 
 			    VOICE_INPUT_TIMIOUT_MILLIS);			

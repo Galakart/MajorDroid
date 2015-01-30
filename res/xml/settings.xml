@@ -71,6 +71,38 @@
     </PreferenceCategory>
     <PreferenceCategory android:title="Сервисы" >
         <PreferenceScreen
+            android:summary="Голосовая активация запроса команды"
+            android:title="Активация голосом" >
+            <ListPreference
+                android:defaultValue="Выкл"
+                android:dialogTitle="Активация"
+                android:entries="@array/voiceactivation"
+                android:entryValues="@array/voiceactivation"
+                android:key="@string/voice_switch"
+                android:summary="Вкл/выкл"
+                android:title="@string/voice_switch" />
+<ListPreference
+                android:defaultValue="проснись"
+                android:dialogTitle="Фраза"
+                android:entries="@array/voicelist"
+                android:entryValues="@array/voicelist"
+                android:key="@string/voice_phrase"
+                android:summary="Активирующая фраза"
+                android:title="@string/voice_phrase" />            
+
+
+<ListPreference
+                android:defaultValue="Выкл"
+                android:dialogTitle="Статус"
+                android:entries="@array/proximitylist"
+                android:entryValues="@array/proximitylist"
+                android:key="@string/voice_proximity"
+                android:summary="Активация при приближении"
+                android:title="@string/voice_proximity" />            
+        </PreferenceScreen>        
+        
+        
+        <PreferenceScreen
             android:summary="Отсылка GPS-координат на домашний сервер"
             android:title="GPS-трекер" >
             <ListPreference

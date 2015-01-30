@@ -16,4 +16,17 @@
 		<item>Выкл</item>
 		<item>Вкл</item>
 	</string-array>
+    <string-array name="voiceactivation">
+		<item>Выкл</item>
+		<item>Вкл</item>
+	</string-array>
+	<string-array name="proximitylist">
+		<item>Выкл</item>
+		<item>Вкл</item>
+	</string-array>	
+    <string-array name="voicelist">
+		<item>проснись</item>        
+		<item>умный дом</item>        
+		<item>дом проснись</item>
+	</string-array>		
 </resources>
