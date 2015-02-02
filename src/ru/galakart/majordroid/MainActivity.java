@@ -78,6 +78,7 @@ import android.hardware.SensorManager;
 
 
 import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.media.ToneGenerator;
 
 import com.example.recognizer.DataFiles;
@@ -125,6 +126,8 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 	private boolean voiceKeywordWorking = false;
 	private boolean voiceGoogleInProgress = false;
 	private final int TCP_SERVER_PORT = 7999; //Define the server port
+	private MediaPlayer mediaPlayer;
+	
 
     private static final String TAG = "Recognizer";
 
@@ -251,6 +254,9 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 	        }
 			delayHandler=new android.os.Handler();
 
+		    mediaPlayer = new MediaPlayer();
+		    mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);			
+			
 	}
 	
     @Override
@@ -748,6 +754,26 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 			url=url.replace("url:", "");
 			mWebView.loadUrl(url);
 		}
+		
+		if (command.equals("pause")) {
+			if (mediaPlayer.isPlaying())
+                mediaPlayer.pause();
+		}
+		
+		if (command.startsWith("play:")) {
+			String url=command;
+			url=url.replace("play:", "");
+			try {
+				mediaPlayer.setDataSource(url);
+				mediaPlayer.prepare();
+				mediaPlayer.start();				
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			
+		}			
 		
 		Toast toast = Toast.makeText(getApplicationContext(),
 				command, Toast.LENGTH_SHORT);

@@ -71,7 +71,7 @@
     </PreferenceCategory>
     <PreferenceCategory android:title="Сервисы" >
         <PreferenceScreen
-            android:summary="Голосовая активация запроса команды"
+            android:summary="Изменения настроек голосового управления вступают в силу после перезагрузки приложения."
             android:title="Активация голосом" >
             <ListPreference
                 android:defaultValue="Выкл"
