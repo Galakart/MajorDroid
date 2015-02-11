@@ -13,24 +13,22 @@ import java.io.PrintWriter;
 
 import java.io.File;
 
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
 import java.util.Queue;
-import java.util.UUID;
 
-import java.net.InetAddress;
-import java.net.NetworkInterface;
+
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
-import java.net.URI;
-import java.net.URLEncoder;
-import java.util.Enumeration;
-import java.net.URLEncoder;
+
+import java.io.DataOutputStream;
+import java.io.FileInputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -41,17 +39,13 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.net.Uri;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.preference.PreferenceManager;
-import android.provider.MediaStore;
 import android.provider.Settings.Secure;
 import android.speech.RecognizerIntent;
 import android.view.Gravity;
@@ -69,8 +63,8 @@ import android.widget.ProgressBar;
 import android.widget.TableLayout;
 import android.widget.Toast;
 import android.util.Log;
-import android.util.Base64;
 
+import android.hardware.Camera;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -79,21 +73,13 @@ import android.hardware.SensorManager;
 
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.media.ToneGenerator;
 
 import com.example.recognizer.DataFiles;
 import com.example.recognizer.Grammar;
 import com.example.recognizer.PhonMapper;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.http.HttpResponse; 
-import org.apache.http.NameValuePair; 
-import org.apache.http.client.HttpClient; 
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost; 
-import org.apache.http.impl.client.DefaultHttpClient; 
-import org.apache.http.message.BasicNameValuePair;
+
 
 import edu.cmu.pocketsphinx.Hypothesis;
 import edu.cmu.pocketsphinx.RecognitionListener;
@@ -102,19 +88,22 @@ import edu.cmu.pocketsphinx.SpeechRecognizerSetup;
 
 
 public class MainActivity extends Activity implements RecognitionListener, SensorEventListener {
-
+	private static final String TAG = MainActivity.class.getSimpleName();
+	
 	private WebView mWebView;
 	private WebView webPost;
 	private ProgressBar Pbar;
 	private String localURL = "", globalURL = "", serverURL = "", login = "",
-			passw = "", wifiHomeNet = "", pathHomepage = "", pathVoice = "", pathGps = "";
+			passw = "", wifiHomeNet = "", pathHomepage = "", pathVoice = "", pathQR="", pathGps = "";
 	private String tmpDostupAccess = "";
 	private String tmpAdressAccess = "";
 	private String VoiceHotWord = "";
+	private String uploadURL = "";
 	private boolean outAccess = false;
 	private boolean firstLoad = false;
 	private static final int REQUEST_CODE_VOICE = 1234;
-	private static final int REQUEST_CODE_VIDEO = 1235;
+	private static final int REQUEST_CODE_MESSAGE = 1236;	
+	private static final int REQUEST_CODE_QR = 1237;	
 	private static final int VOICE_INPUT_TIMIOUT_MILLIS = 10000;
 	private String gpsTimeOut;
 	private Timer timer;
@@ -127,9 +116,8 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 	private boolean voiceGoogleInProgress = false;
 	private final int TCP_SERVER_PORT = 7999; //Define the server port
 	private MediaPlayer mediaPlayer;
+    private String qrCameraSet;	
 	
-
-    private static final String TAG = "Recognizer";
 
     private static final String COMMAND_SEARCH = "command";
     private static final String KWS_SEARCH = "hotword";
@@ -141,6 +129,9 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
     private SensorManager mSensorManager;
     private float mSensorMaximum;
     private float mSensorValue;
+    ProgressDialog dialog;
+    private int serverResponseCode=0;
+    private String activityResultString="";
     
 	
     private final Runnable mStopRecognitionCallback = new Runnable() {
@@ -201,6 +192,8 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 					Long.parseLong(gpsTimeOut) * 60 * 1000);
 			timerOn = true;
 		}
+		
+		
 		
 		  //New thread to listen to incoming connections
 		  new Thread(new Runnable() {
@@ -480,6 +473,10 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 			Intent ab = new Intent(this, AboutActivity.class);
 			startActivity(ab);
 			return true;
+			
+		case R.id.action_videorecord:
+			extCommand("videomessage");
+			return true;			
 
 		case R.id.action_quit:
 		    timer.cancel();
@@ -508,13 +505,65 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 					.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
 			voiceCommand(matches.get(0));
 		}
-		if (requestCode == REQUEST_CODE_VIDEO && resultCode == RESULT_OK) {
-			Uri videoUri = data.getData();
-			Toast toast = Toast.makeText(getApplicationContext(), videoUri.toString(),
+
+		
+		if (requestCode == REQUEST_CODE_MESSAGE && resultCode == RESULT_OK) {
+			Log.d(TAG, "Got REQUEST_CODE_MESSAGE");
+
+			activityResultString = data.getStringExtra("filename");
+			
+			/*
+			Toast toast = Toast.makeText(getApplicationContext(), "Got video message!\n"+activityResultString,
 					Toast.LENGTH_LONG);
 			toast.setGravity(Gravity.BOTTOM, 0, 0);
-			toast.show();			
+			toast.show();
+			*/
+			
+            dialog = ProgressDialog.show(MainActivity.this, "", "Uploading file...", true);
+            
+            new Thread(new Runnable() {
+                    public void run() {
+
+                         uploadFile(activityResultString);
+                                                  
+                    }
+                  }).start();   			
+			
+		}
+		
+		if (requestCode == REQUEST_CODE_QR) {
+			IntentResult scanResult = IntentIntegrator.parseActivityResult(
+                    requestCode, resultCode, data);
+
+			if (scanResult != null) {
+                // handle scan result
+                String contantsString = scanResult.getContents() == null ? "0"
+                                : scanResult.getContents();
+                
+                if (contantsString.equalsIgnoreCase("0")) {
+                        Toast.makeText(this, "No code scanned",
+                                        Toast.LENGTH_LONG).show();
+
+                } else {
+                        Toast.makeText(this, contantsString, Toast.LENGTH_LONG).show();
+                        if (contantsString.startsWith("http")) {
+                        	mWebView.loadUrl(contantsString);
+                        } else {
+                        	mWebView.loadUrl("http://" + serverURL + pathQR + contantsString);
+                        }
+                }
+
+        } else {
+                Toast.makeText(this, "Problem to secan the barcode.",
+                                Toast.LENGTH_LONG).show();
+        }
+
 		}		
+		
+		
+		if (resultCode != RESULT_OK) {
+			Log.d(TAG, "Activity finished (not OK)");	
+		}
 		
 		if (voiceKeywordEnable && !voiceKeywordWorking) {
 			voiceGoogleInProgress=false;			
@@ -539,8 +588,7 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 	    //Get the data input stream comming from the client
 	    InputStream is = mySocket.getInputStream();
 	    //Get the output stream to the client
-	    PrintWriter out = new PrintWriter(
-	      mySocket.getOutputStream(), true);
+	    PrintWriter out = new PrintWriter(mySocket.getOutputStream(), true);
 	    //Write data to the data output stream
 	    //out.println("Hello from server");
 	    //Buffer the data input stream
@@ -563,6 +611,8 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 		extCommand(s);	
 	  }
 	 }
+	 
+ 
 	
 	public class MajorDroidWebViewer extends WebViewClient {
 		@Override
@@ -612,6 +662,7 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 		globalURL = prefs.getString(getString(R.string.globalUrl), "");
 		pathHomepage = prefs.getString(getString(R.string.path_homepage), "");
 		pathVoice = prefs.getString(getString(R.string.path_voice), "");
+		pathQR = prefs.getString(getString(R.string.path_qr), "");
 		pathGps = prefs.getString(getString(R.string.path_tracker), "");
 		login = prefs.getString(getString(R.string.login), "");
 		passw = prefs.getString(getString(R.string.passw), "");
@@ -676,6 +727,9 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 			}
 			tmpDostupAccess = dostup;
 		}
+		
+		uploadURL="http://" + serverURL + prefs.getString(getString(R.string.path_video), "");
+		
 		if (!serverURL.equals(tmpAdressAccess))
 			firstLoad = false;
 
@@ -735,20 +789,19 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 		if (command.equals("pult")) {
 			imgb_pult_click(null);	
 		}
-		if (command.equals("videorecord")) {
-			   if (voiceKeywordWorking) {
-			        mRecognizer.cancel();
-			        mRecognizer.stop();
-			        voiceKeywordWorking=false;
-			   }
-
-			   Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-			    if (takeVideoIntent.resolveActivity(getPackageManager()) != null) {
-			        startActivityForResult(takeVideoIntent, REQUEST_CODE_VIDEO);
-			    }
-			    
+		if (command.equals("videomessage")) {
+			if (voiceKeywordWorking) {
+		        mRecognizer.cancel();
+		        mRecognizer.stop();
+		        voiceKeywordWorking=false;
+			}			
+			Intent vr = new Intent(this, VideoRecordActivity.class);
+			startActivityForResult(vr, REQUEST_CODE_MESSAGE);
 		}
-		
+		if (command.equals("qrscan")) {
+			imgb_qr_click(null);
+		}		
+
 		if (command.startsWith("url:")) {
 			String url=command;
 			url=url.replace("url:", "");
@@ -811,6 +864,70 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 		loadHomePage(1);
 	}
 
+	 private int getFrontFacingCameraId() {
+		    int cameraCount = 0;
+		    int cam = 0;
+		    Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
+		    cameraCount = Camera.getNumberOfCameras();
+		    for (int camIdx = 0; camIdx < cameraCount; camIdx++) {
+		        Camera.getCameraInfo(camIdx, cameraInfo);
+		        if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+		            try {
+		                cam = camIdx;
+		            } catch (RuntimeException e) {
+		                Log.e(TAG, "Camera failed to open: " + e.getLocalizedMessage());
+		            }
+		        }
+		    }
+		    return cam;
+		}
+	 
+	 private int getBackFacingCameraId() {
+		    int cameraCount = 0;
+		    int cam = 0;
+		    Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
+		    cameraCount = Camera.getNumberOfCameras();
+		    for (int camIdx = 0; camIdx < cameraCount; camIdx++) {
+		        Camera.getCameraInfo(camIdx, cameraInfo);
+		        if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_BACK) {
+		            try {
+		                cam = camIdx;
+		            } catch (RuntimeException e) {
+		                Log.e(TAG, "Camera failed to open: " + e.getLocalizedMessage());
+		            }
+		        }
+		    }
+		    return cam;
+		}		 
+	
+	public void imgb_qr_click(View v) {
+		   if (voiceKeywordWorking) {
+		        mRecognizer.cancel();
+		        mRecognizer.stop();
+		        voiceKeywordWorking=false;
+		   }
+		
+		   IntentIntegrator integrator = new IntentIntegrator(MainActivity.this);
+		
+		   SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);		   
+		   qrCameraSet=prefs.getString(getString(R.string.qrcamera_switch), "0");			   
+		   if (!qrCameraSet.equals("0")) {
+			 Log.d(TAG,"Searching front qr camera "+qrCameraSet);
+			 int camID=getFrontFacingCameraId();
+			 Log.d(TAG,"Camera qr found "+Integer.toString(camID));
+        	 integrator.setCameraId(Integer.toString(camID));
+		   } else {
+ 		     Log.d(TAG,"Searching back qr camera "+qrCameraSet);
+			 int camID=getBackFacingCameraId();
+			 Log.d(TAG,"Camera qr found "+Integer.toString(camID));
+	         integrator.setCameraId(Integer.toString(camID));
+		   }
+		   
+           integrator.initiateScan();
+           		   
+		   
+	}
+	
 	public void imgb_voice_click(View v) {
 		
 		if (voiceGoogleInProgress) return;
@@ -981,6 +1098,143 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 			// TODO Auto-generated method stub
 		}
 	}
+	
+	public int uploadFile(String sourceFileUri) {
+        
+        
+        String fileName = sourceFileUri;
+
+        HttpURLConnection conn = null;
+        DataOutputStream dos = null; 
+        String lineEnd = "\r\n";
+        String twoHyphens = "--";
+        String boundary = "*****";
+        int bytesRead, bytesAvailable, bufferSize;
+        byte[] buffer;
+        int maxBufferSize = 1 * 1024 * 1024;
+        File sourceFile = new File(sourceFileUri);
+         
+        if (!sourceFile.isFile()) {
+             
+             dialog.dismiss();
+              
+             Log.e("uploadFile", "Source File not exist :"
+                                 +sourceFileUri);
+             
+              
+             return 0;
+          
+        }
+        else
+        {
+             try {
+                  
+                   // open a URL connection to the Servlet
+                 FileInputStream fileInputStream = new FileInputStream(sourceFile);
+                 URL url = new URL(uploadURL);
+                  
+                 // Open a HTTP  connection to  the URL
+                 conn = (HttpURLConnection) url.openConnection();
+                 conn.setDoInput(true); // Allow Inputs
+                 conn.setDoOutput(true); // Allow Outputs
+                 conn.setUseCaches(false); // Don't use a Cached Copy
+                 conn.setRequestMethod("POST");
+                 conn.setRequestProperty("Connection", "Keep-Alive");
+                 conn.setRequestProperty("ENCTYPE", "multipart/form-data");
+                 conn.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
+                 conn.setRequestProperty("uploaded_file", fileName);
+                  
+                 dos = new DataOutputStream(conn.getOutputStream());
+        
+                 dos.writeBytes(twoHyphens + boundary + lineEnd);
+                 dos.writeBytes("Content-Disposition: form-data; name=\"uploaded_file\";filename=\""
+                                           + fileName + "\"" + lineEnd);
+                  
+                 dos.writeBytes(lineEnd);
+        
+                 // create a buffer of  maximum size
+                 bytesAvailable = fileInputStream.available();
+        
+                 bufferSize = Math.min(bytesAvailable, maxBufferSize);
+                 buffer = new byte[bufferSize];
+        
+                 // read file and write it into form...
+                 bytesRead = fileInputStream.read(buffer, 0, bufferSize); 
+                    
+                 while (bytesRead > 0) {
+                      
+                   dos.write(buffer, 0, bufferSize);
+                   bytesAvailable = fileInputStream.available();
+                   bufferSize = Math.min(bytesAvailable, maxBufferSize);
+                   bytesRead = fileInputStream.read(buffer, 0, bufferSize);  
+                    
+                  }
+        
+                 // send multipart form data necesssary after file data...
+                 dos.writeBytes(lineEnd);
+                 dos.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
+        
+                 // Responses from the server (code and message)
+                 serverResponseCode = conn.getResponseCode();
+                 String serverResponseMessage = conn.getResponseMessage();
+                   
+                 Log.i(TAG, "HTTP Response is : "
+                         + serverResponseMessage + ": " + serverResponseCode);
+                  
+                 if(serverResponseCode == 200){
+                      
+                     runOnUiThread(new Runnable() {
+                          public void run() {
+                               
+                              String msg = "File Upload Completed.";
+                               
+                              Toast.makeText(MainActivity.this, "File Upload Complete.",
+                                           Toast.LENGTH_SHORT).show();
+                          }
+                      });               
+                 }   
+                  
+                 //close the streams //
+                 fileInputStream.close();
+                 dos.flush();
+                 dos.close();
+                 
+                 File file = new File(sourceFileUri);
+                 boolean deleted = file.delete();
+                   
+            } catch (MalformedURLException ex) {
+                 
+                dialog.dismiss(); 
+                ex.printStackTrace();
+                 
+                runOnUiThread(new Runnable() {
+                    public void run() {
+                        Toast.makeText(MainActivity.this, "MalformedURLException",
+                                                            Toast.LENGTH_SHORT).show();
+                    }
+                });
+                 
+                Log.e(TAG, "error: " + ex.getMessage(), ex); 
+            } catch (Exception e) {
+                 
+                dialog.dismiss(); 
+                e.printStackTrace();
+                 
+                runOnUiThread(new Runnable() {
+                    public void run() {
+                        Toast.makeText(MainActivity.this, "Got Exception : see logcat ",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+                Log.e(TAG, "Exception : "
+                                                 + e.getMessage(), e); 
+            }
+            dialog.dismiss();      
+            return serverResponseCode;
+             
+         } // End else block
+       } 	
+	
 }
 /*
  * На будущее: 1. Использовать reload(); при обновлении браузера 2. Использовать

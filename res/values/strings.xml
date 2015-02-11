@@ -3,6 +3,7 @@
 
     <string name="app_name">MajorDroid</string>
     <string name="action_settings">Настройки</string>
+    <string name="action_videorecord">Видео-сообщение</string>
     <string name="action_quit">Выход</string>
     <string name="hello_world">Hello world!</string>
     <string name="title_activity_contros">Пульт управления</string>
@@ -23,13 +24,15 @@
     <string name="gps_switch">GPS-трекер</string>
     <string name="voice_switch">Голосовая активация</string>
     <string name="voice_phrase">Фраза активации</string>
-    <string name="voice_proximity">Активация при приближении</string>    
+    <string name="voice_proximity">Активация при приближении</string>
     <string name="gps_period_title">Периодичность отправки координат (в мин.)</string>
     <string name="gps_period">Периодичность</string>
     <string name="path_homepage">Домашняя страница</string>
     <string name="path_scripts">Скрипты</string>
     <string name="path_voice">Голосовые команды</string>
     <string name="path_tracker">Трекер</string>
+    <string name="path_qr">QR-сканер</string>
+    <string name="path_video">Видео-сообщения</string>
     <string name="scriptdialog">Название скрипта в MajorDomo:</string>
     <string name="script_summary">Задайте название скрипта</string>
     <string name="scriptname1">Скрипт 1</string>
@@ -43,9 +46,25 @@
     <string name="scriptname9">Скрипт 9</string>
     <string name="title_activity_about">О программе</string>
     <string name="title_btn_rate">Оценить в маркете</string>
-    <string name="about_url">v1.3b http://smartliving.ru</string>
+    <string name="about_url">v1.4b http://smartliving.ru</string>
     <string name="about_donate">Приложение для управления сервером умного дома MajorDomo.\n\nЛицензия Beerware - каждый довольный пользователь может выпить пива в честь автора android-приложения, или поддержать материально:\nWebMoney: R052376421830</string>
-	<string name="wifihomenet">Wifi домашняя сеть</string>
-	<string name="hotword">проснись</string>
+    <string name="wifihomenet">Wifi домашняя сеть</string>
+    <string name="hotword">проснись</string>
+    <string name="title_activity_video_recording">VideoRecordingActivity</string>
+    <string name="title_activity_video_record">VideoRecordActivity</string>
+    <string name="btnRecordStartTitle">Начать запись</string>
+    <string name="btnRecordStopTitle">Закончить запись</string>
+    <string name="btnCancelTitle">Отменить запись</string>
+    <string name="qrcamera_switch">Камера для сканера штрих-кодов</string>
+    <string name="msgcamera_switch">Камера для видео-сообщений</string>
+    <string name="turncamera_switch">Поворот камеры для видео-сообщений</string>
+    <string name="turnvideo_switch">Поворот видео</string>
+    <string name="quality_switch">Качество видео</string>    
+    
+    <string name="maxlenght">Длительность сообщения, сек</string>
+    <string name="maxlenght_summary">Максимальная длительность видео-сообщения</string>    
+    
+	<string name="maxsize">Размер сообщение, Мб</string>
+    <string name="maxsize_summary">Максимальный размер видео-сообщения</string>    
 
 </resources>
