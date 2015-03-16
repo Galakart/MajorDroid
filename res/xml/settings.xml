@@ -54,6 +54,20 @@
                 android:defaultValue="/gps.php"
                 android:key="@string/path_tracker"
                 android:title="@string/path_tracker" />
+            <EditTextPreference
+                android:defaultValue="/popup/app_qrcodes.html?qr="
+                android:key="@string/path_qr"
+                android:title="@string/path_qr" />
+            <EditTextPreference
+                android:defaultValue="/popup/app_videomessages.html"
+                android:key="@string/path_video"
+                android:title="@string/path_video" />
+            
+            <EditTextPreference
+                android:defaultValue="/objects/?script=facedetection"
+                android:key="@string/path_face"
+                android:title="@string/path_face" />            
+            
         </PreferenceScreen>
     </PreferenceCategory>
     <PreferenceCategory android:title="Пользователь" >
@@ -98,9 +112,115 @@
                 android:entryValues="@array/proximitylist"
                 android:key="@string/voice_proximity"
                 android:summary="Активация при приближении"
-                android:title="@string/voice_proximity" />            
+                android:title="@string/voice_proximity" />  
+                  
+        </PreferenceScreen>
+        
+
+        
+        <PreferenceScreen
+            android:summary="Настройки использования камеры"
+            android:title="Использование камеры" >
+            <ListPreference
+                android:title="@string/qrcamera_switch"
+                android:defaultValue="0"
+                android:dialogTitle="Выбор камеры"
+                android:entries="@array/cameralist_titles"
+                android:entryValues="@array/cameralist"
+                android:key="@string/qrcamera_switch"
+                android:summary="Выбор камеры"
+                 />
+            <ListPreference
+                android:title="@string/msgcamera_switch"
+                android:defaultValue="0"
+                android:dialogTitle="Выбор камеры"
+                android:entries="@array/cameralist_titles"
+                android:entryValues="@array/cameralist"
+                android:key="@string/msgcamera_switch"
+                android:summary="Выбор камеры"
+                 />
+            
+            <ListPreference
+                android:title="@string/facecamera_switch"
+                android:defaultValue="0"
+                android:dialogTitle="Выбор камеры"
+                android:entries="@array/cameralist_titles"
+                android:entryValues="@array/cameralist"
+                android:key="@string/facecamera_switch"
+                android:summary="Выбор камеры"
+                 />            
+            
+            <ListPreference
+                android:title="@string/turncamera_switch"
+                android:defaultValue="0"
+                android:dialogTitle="Угол поворота"
+                android:entries="@array/cameraturn"
+                android:entryValues="@array/cameraturn"
+                android:key="@string/turncamera_switch"
+                android:summary="Выбор угла поворота"
+                 />
+            <ListPreference
+                android:title="@string/turnvideo_switch"
+                android:defaultValue="0"
+                android:dialogTitle="Угол поворота"
+                android:entries="@array/cameraturn"
+                android:entryValues="@array/cameraturn"
+                android:key="@string/turnvideo_switch"
+                android:summary="Выбор угла поворота"
+                 />
+            
+            <ListPreference
+                android:title="@string/quality_switch"
+                android:defaultValue="Low"
+                android:dialogTitle="@string/quality_switch"
+                android:entries="@array/qualitylist"
+                android:entryValues="@array/qualitylist"
+                android:key="@string/quality_switch"
+                android:summary="Выбор качества записи видео"
+                 />
+
+            
+<EditTextPreference
+            android:dialogTitle="@string/maxlenght"
+            android:key="@string/maxlenght"
+            android:summary="@string/maxlenght_summary"
+            android:defaultValue="50"
+            android:title="@string/maxlenght" />  
+            
+<EditTextPreference
+            android:dialogTitle="@string/maxsize"
+            android:key="@string/maxsize"
+            android:summary="@string/maxsize_summary"
+            android:defaultValue="20"
+            android:title="@string/maxsize" />
+
+                                    <ListPreference
+                android:title="@string/homeaftervideo"
+                android:defaultValue="off"
+                android:dialogTitle="@string/homeaftervideo"
+                android:entries="@array/onofflist_titles"
+                android:entryValues="@array/onofflist"
+                android:key="@string/homeaftervideo"
+                android:summary="@string/homeaftervideo_summary"
+                 /> 
+
         </PreferenceScreen>        
         
+<PreferenceScreen
+            android:summary="Изменения настроек распознавания лиц"
+            android:title="@string/facedetection" >
+
+<ListPreference
+                android:title="@string/facedetection"
+                android:defaultValue="off"
+                android:dialogTitle="@string/facedetection"
+                android:entries="@array/onofflist_titles"
+                android:entryValues="@array/onofflist"
+                android:key="@string/facedetection"
+                android:summary="@string/facedetection_summary"
+                 />     
+    
+        </PreferenceScreen>        
         
         <PreferenceScreen
             android:summary="Отсылка GPS-координат на домашний сервер"
