@@ -62,6 +62,12 @@
                 android:defaultValue="/popup/app_videomessages.html"
                 android:key="@string/path_video"
                 android:title="@string/path_video" />
+            
+            <EditTextPreference
+                android:defaultValue="/objects/?script=facedetection"
+                android:key="@string/path_face"
+                android:title="@string/path_face" />            
+            
         </PreferenceScreen>
     </PreferenceCategory>
     <PreferenceCategory android:title="Пользователь" >
@@ -106,8 +112,11 @@
                 android:entryValues="@array/proximitylist"
                 android:key="@string/voice_proximity"
                 android:summary="Активация при приближении"
-                android:title="@string/voice_proximity" />            
+                android:title="@string/voice_proximity" />  
+                  
         </PreferenceScreen>
+        
+
         
         <PreferenceScreen
             android:summary="Настройки использования камеры"
@@ -130,6 +139,17 @@
                 android:key="@string/msgcamera_switch"
                 android:summary="Выбор камеры"
                  />
+            
+            <ListPreference
+                android:title="@string/facecamera_switch"
+                android:defaultValue="0"
+                android:dialogTitle="Выбор камеры"
+                android:entries="@array/cameralist_titles"
+                android:entryValues="@array/cameralist"
+                android:key="@string/facecamera_switch"
+                android:summary="Выбор камеры"
+                 />            
+            
             <ListPreference
                 android:title="@string/turncamera_switch"
                 android:defaultValue="0"
@@ -157,7 +177,8 @@
                 android:entryValues="@array/qualitylist"
                 android:key="@string/quality_switch"
                 android:summary="Выбор качества записи видео"
-                 />            
+                 />
+
             
 <EditTextPreference
             android:dialogTitle="@string/maxlenght"
@@ -172,9 +193,34 @@
             android:summary="@string/maxsize_summary"
             android:defaultValue="20"
             android:title="@string/maxsize" />
-            
+
+                                    <ListPreference
+                android:title="@string/homeaftervideo"
+                android:defaultValue="off"
+                android:dialogTitle="@string/homeaftervideo"
+                android:entries="@array/onofflist_titles"
+                android:entryValues="@array/onofflist"
+                android:key="@string/homeaftervideo"
+                android:summary="@string/homeaftervideo_summary"
+                 /> 
+
         </PreferenceScreen>        
         
+<PreferenceScreen
+            android:summary="Изменения настроек распознавания лиц"
+            android:title="@string/facedetection" >
+
+<ListPreference
+                android:title="@string/facedetection"
+                android:defaultValue="off"
+                android:dialogTitle="@string/facedetection"
+                android:entries="@array/onofflist_titles"
+                android:entryValues="@array/onofflist"
+                android:key="@string/facedetection"
+                android:summary="@string/facedetection_summary"
+                 />     
+    
+        </PreferenceScreen>        
         
         <PreferenceScreen
             android:summary="Отсылка GPS-координат на домашний сервер"

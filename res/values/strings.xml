@@ -28,11 +28,12 @@
     <string name="gps_period_title">Периодичность отправки координат (в мин.)</string>
     <string name="gps_period">Периодичность</string>
     <string name="path_homepage">Домашняя страница</string>
-    <string name="path_scripts">Скрипты</string>
-    <string name="path_voice">Голосовые команды</string>
-    <string name="path_tracker">Трекер</string>
-    <string name="path_qr">QR-сканер</string>
-    <string name="path_video">Видео-сообщения</string>
+    <string name="path_scripts">Обработчик скриптов</string>
+    <string name="path_voice">Обработчик голосовых команд</string>
+    <string name="path_tracker">Обработчик GPS</string>
+    <string name="path_qr">Обработчик QR-кодов</string>
+    <string name="path_video">Обработчик видео-сообщений</string>
+    <string name="path_face">Обработчик детектора лиц</string>
     <string name="scriptdialog">Название скрипта в MajorDomo:</string>
     <string name="script_summary">Задайте название скрипта</string>
     <string name="scriptname1">Скрипт 1</string>
@@ -57,6 +58,7 @@
     <string name="btnCancelTitle">Отменить запись</string>
     <string name="qrcamera_switch">Камера для сканера штрих-кодов</string>
     <string name="msgcamera_switch">Камера для видео-сообщений</string>
+    <string name="facecamera_switch">Камера для распознавания лиц</string>
     <string name="turncamera_switch">Поворот камеры для видео-сообщений</string>
     <string name="turnvideo_switch">Поворот видео</string>
     <string name="quality_switch">Качество видео</string>    
@@ -66,5 +68,12 @@
     
 	<string name="maxsize">Размер сообщение, Мб</string>
     <string name="maxsize_summary">Максимальный размер видео-сообщения</string>    
+    
+	<string name="homeaftervideo">Обновление страницы</string>
+    <string name="homeaftervideo_summary">Переходить на домашнюю страницу после записи видео</string>    
+
+	<string name="facedetection">Распознавание лиц</string>
+    <string name="facedetection_summary">Сервис распознавания лица в кадре</string>    
+    
 
 </resources>

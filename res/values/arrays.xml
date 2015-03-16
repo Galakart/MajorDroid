@@ -37,6 +37,14 @@
 		<item>Основная</item>
 		<item>Дополнительная</item>
 	</string-array>	
+	<string-array name="onofflist">
+		<item>off</item>
+		<item>on</item>
+	</string-array>
+	<string-array name="onofflist_titles">
+		<item>Выкл</item>
+		<item>Вкл</item>
+	</string-array>		
     <string-array name="voicelist">
 		<item>проснись</item>        
 		<item>умный дом</item>        

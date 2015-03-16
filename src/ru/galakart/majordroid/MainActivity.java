@@ -52,6 +52,7 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
 import android.webkit.HttpAuthHandler;
@@ -63,6 +64,9 @@ import android.widget.ProgressBar;
 import android.widget.TableLayout;
 import android.widget.Toast;
 import android.util.Log;
+import android.hardware.Camera;
+import android.hardware.Camera.Face;
+import android.hardware.Camera.FaceDetectionListener;
 
 import android.hardware.Camera;
 import android.hardware.Sensor;
@@ -99,6 +103,7 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 	private String tmpAdressAccess = "";
 	private String VoiceHotWord = "";
 	private String uploadURL = "";
+	private String faceURL = "";
 	private boolean outAccess = false;
 	private boolean firstLoad = false;
 	private static final int REQUEST_CODE_VOICE = 1234;
@@ -110,20 +115,26 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 	private TimerTask doAsynchronousTask;
 	private Handler delayHandler;
 	private boolean timerOn = false;
+	private boolean faceDetectionEnable = false;
+	private boolean faceDetectionWorking = false;
+	
 	private boolean voiceProximityEnable = false;
 	private boolean voiceKeywordEnable = false;
 	private boolean voiceKeywordWorking = false;
 	private boolean voiceGoogleInProgress = false;
+	private boolean disableFacePost = false;
 	private final int TCP_SERVER_PORT = 7999; //Define the server port
 	private MediaPlayer mediaPlayer;
     private String qrCameraSet;	
-	
+    private Camera mCamera;
+    private SurfaceView cameraSurface;
+    
+    private int NumberOfFacesDetected=0;
 
     private static final String COMMAND_SEARCH = "command";
     private static final String KWS_SEARCH = "hotword";
 
     private final Handler mHandler = new Handler();
-    private final Queue<String> mSpeechQueue = new LinkedList<String>();
     private SpeechRecognizer mRecognizer;
     
     private SensorManager mSensorManager;
@@ -133,6 +144,30 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
     private int serverResponseCode=0;
     private String activityResultString="";
     
+
+    private FaceDetectionListener faceDetectionListener = new FaceDetectionListener() {
+        @Override
+        public void onFaceDetection(Face[] faces, Camera camera) {
+        	if (faces.length!=NumberOfFacesDetected) {
+             Log.d("onFaceDetection", "Number of Faces:" + faces.length);
+             NumberOfFacesDetected=faces.length;
+        	 String resURL=faceURL + "&faces=" + Integer.toString(NumberOfFacesDetected);
+        	 //Log.d("onFaceDetection", "Loading face URL:" + resURL);
+        	 if (!disableFacePost) {
+              webPost.loadUrl(resURL);
+        	 }
+
+             if (NumberOfFacesDetected>0) {
+			  Toast toast = Toast.makeText(getApplicationContext(),
+					"Faces detected: "+Integer.toString(NumberOfFacesDetected), Toast.LENGTH_SHORT);
+			  toast.setGravity(Gravity.BOTTOM, 0, 0);
+			  toast.show();
+             }
+             
+        	}
+        }
+    };    
+    
 	
     private final Runnable mStopRecognitionCallback = new Runnable() {
         @Override
@@ -141,6 +176,23 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
         }
     };
 
+    
+    @Override
+    protected void onPause() {   	
+
+    	Log.d(TAG, "Activity pause");
+    	super.onPause();    	
+		if (voiceKeywordWorking) {
+	        mRecognizer.cancel();
+	        mRecognizer.stop();
+	        voiceKeywordWorking=false;
+		}
+		turnOffFaceDetectionCamera();
+		
+    }
+    
+    
+    
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -255,7 +307,15 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
     @Override
     protected void onDestroy() {
         if (mRecognizer != null) mRecognizer.cancel();
-        mSensorManager.unregisterListener(this);        
+        mSensorManager.unregisterListener(this);
+		if (voiceKeywordWorking) {
+	        mRecognizer.cancel();
+	        mRecognizer.stop();
+	        voiceKeywordWorking=false;
+		}        
+        turnOffFaceDetectionCamera();
+        if (mCamera!=null) mCamera=null;
+        
         super.onDestroy();
     }
     
@@ -499,6 +559,9 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		
+		int goToHome=0;
+		
 		delayHandler.removeCallbacksAndMessages(null);		
 		if (requestCode == REQUEST_CODE_VOICE && resultCode == RESULT_OK) {
 			ArrayList<String> matches = data
@@ -518,13 +581,18 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 			toast.setGravity(Gravity.BOTTOM, 0, 0);
 			toast.show();
 			*/
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+ 			 if (prefs.getString(getString(R.string.homeaftervideo), "off").equals("on")) {
+			   goToHome=1;
+			 }			
 			
             dialog = ProgressDialog.show(MainActivity.this, "", "Uploading file...", true);
             
             new Thread(new Runnable() {
                     public void run() {
 
-                         uploadFile(activityResultString);
+                        uploadFile(activityResultString);
+
                                                   
                     }
                   }).start();   			
@@ -570,7 +638,13 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 	        mRecognizer.cancel();
 	        mRecognizer.startListening(KWS_SEARCH);
 	        voiceKeywordWorking=true;
-		}		
+		}
+		initiateFaceDetectionCamera();
+		
+		if (goToHome==1) {
+	     imgb_home_click(null);
+		}
+		
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 	
@@ -651,8 +725,11 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 
 	@Override
 	public void onResume() {
+    	Log.d(TAG, "Activity resume");    	
+		
 		super.onResume();
 		loadHomePage(0);
+		
 		}	
 
 	private void loadHomePage(int immediateLoad) {
@@ -729,6 +806,7 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 		}
 		
 		uploadURL="http://" + serverURL + prefs.getString(getString(R.string.path_video), "");
+		faceURL="http://" + serverURL + prefs.getString(getString(R.string.path_face), "");
 		
 		if (!serverURL.equals(tmpAdressAccess))
 			firstLoad = false;
@@ -772,7 +850,63 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 			voiceProximityEnable=false;				
 		}
 		
+		initiateFaceDetectionCamera();
+		
     }
+	
+	private void initiateFaceDetectionCamera() {
+
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		
+		if (prefs.getString(getString(R.string.facedetection), "off").equals("on")) {
+			faceDetectionEnable=true;
+			if (!faceDetectionWorking) {
+			 int cameraId=0;
+			 if (prefs.getString(getString(R.string.facecamera_switch), "0").equals("1")) {
+			  cameraId=getFrontFacingCameraId();
+			 } else {
+			  cameraId=getBackFacingCameraId();
+			 }
+			 Log.d(TAG,"Initiating camera "+Integer.toString(cameraId));
+			 mCamera = Camera.open(cameraId);
+			 cameraSurface = new SurfaceView(this);
+			 if (mCamera.getParameters().getMaxNumDetectedFaces()>0) {
+				 try {
+					mCamera.setPreviewDisplay(cameraSurface.getHolder());
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				 mCamera.setFaceDetectionListener(faceDetectionListener);
+				 mCamera.startPreview();
+				 mCamera.startFaceDetection();
+				 Log.d(TAG,"Face detection started for camera "+Integer.toString(cameraId));
+ 				 faceDetectionWorking=true;
+			 } else {
+				Toast.makeText(this, "Face detection is not supported for camera "+Integer.toString(cameraId), Toast.LENGTH_SHORT).show();				 
+				Log.d(TAG,"Face detection is not supported for camera "+Integer.toString(cameraId));
+				faceDetectionWorking=false;
+				faceDetectionEnable=false;
+				mCamera.release();
+			 }
+			}
+		} else {
+			Log.d(TAG,"Facedetection disabled"); 
+			faceDetectionEnable=false;
+		    turnOffFaceDetectionCamera();
+		}		
+		
+	}
+	
+	private void turnOffFaceDetectionCamera() {
+		if (faceDetectionWorking) { 
+		 mCamera.setFaceDetectionListener(null);
+		 mCamera.setErrorCallback(null);
+		 mCamera.stopPreview();
+		 mCamera.release();
+		 faceDetectionWorking=false;
+		 Log.d(TAG,"Facedetection stopped");
+		}
+	}
 
 	private void extCommand(String command) {
 
@@ -794,7 +928,8 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 		        mRecognizer.cancel();
 		        mRecognizer.stop();
 		        voiceKeywordWorking=false;
-			}			
+			}
+			turnOffFaceDetectionCamera();
 			Intent vr = new Intent(this, VideoRecordActivity.class);
 			startActivityForResult(vr, REQUEST_CODE_MESSAGE);
 		}
@@ -835,6 +970,8 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 	}
 	
 	private void voiceCommand(String command) {
+
+		disableFacePost=true;
 		webPost.loadUrl("http://" + serverURL + pathVoice + command);
 
 
@@ -842,6 +979,14 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 				Toast.LENGTH_LONG);
 		toast.setGravity(Gravity.BOTTOM, 0, 0);
 		toast.show();
+		
+		new android.os.Handler().postDelayed(
+			    new Runnable() {
+			        public void run() {
+			        	disableFacePost=false;
+			        }
+			    }, 
+			3000);		
 
 		
 /*		
@@ -906,6 +1051,7 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 		        mRecognizer.stop();
 		        voiceKeywordWorking=false;
 		   }
+		   turnOffFaceDetectionCamera();
 		
 		   IntentIntegrator integrator = new IntentIntegrator(MainActivity.this);
 		
@@ -947,6 +1093,7 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 		        mRecognizer.stop();
 		        voiceKeywordWorking=false;
 			}
+			turnOffFaceDetectionCamera();
 
 			voiceGoogleInProgress=true;
 			Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
@@ -967,6 +1114,7 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 			                  mRecognizer.startListening(KWS_SEARCH);
 			            	  voiceKeywordWorking=true;			                  
 				             }
+				             initiateFaceDetectionCamera();
 				        	}
 				        }
 				    }, 
