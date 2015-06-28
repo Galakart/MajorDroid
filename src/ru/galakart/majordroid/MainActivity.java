@@ -562,7 +562,10 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 		
 		int goToHome=0;
 		
-		delayHandler.removeCallbacksAndMessages(null);		
+		delayHandler.removeCallbacksAndMessages(null);
+		if (requestCode == REQUEST_CODE_VOICE) {
+			voiceGoogleInProgress = false;
+		}
 		if (requestCode == REQUEST_CODE_VOICE && resultCode == RESULT_OK) {
 			ArrayList<String> matches = data
 					.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
