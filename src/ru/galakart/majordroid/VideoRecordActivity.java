@@ -7,9 +7,9 @@ import java.io.IOException;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.ActivityInfo;
+//import android.content.pm.ActivityInfo;
 import android.hardware.Camera;
-import android.hardware.Camera.CameraInfo;
+//import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.Parameters;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
@@ -238,9 +238,9 @@ public class VideoRecordActivity extends Activity implements SurfaceHolder.Callb
         if (msgVideoQuality.equals("High")) {
             mrec.setProfile(CamcorderProfile.get(cameraIndex,CamcorderProfile.QUALITY_HIGH));
         } else if (msgVideoQuality.equals("480P")) {
-         mrec.setProfile(CamcorderProfile.get(cameraIndex,CamcorderProfile.QUALITY_480P));
+         mrec.setProfile(CamcorderProfile.get(cameraIndex,CamcorderProfile.QUALITY_480P)); //
         } else if (msgVideoQuality.equals("720P")) {
-             mrec.setProfile(CamcorderProfile.get(cameraIndex,CamcorderProfile.QUALITY_720P));
+             mrec.setProfile(CamcorderProfile.get(cameraIndex,CamcorderProfile.QUALITY_720P));//
         } else {
             mrec.setProfile(CamcorderProfile.get(cameraIndex,CamcorderProfile.QUALITY_LOW));        	
         }

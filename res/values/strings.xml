@@ -28,6 +28,8 @@
     <string name="gps_period_title">Периодичность отправки координат (в мин.)</string>
     <string name="gps_period">Периодичность</string>
     <string name="path_homepage">Домашняя страница</string>
+    <string name="homepage_period">Авто-обновление страницы</string>
+    <string name="homepage_period_summary">Период авто-обновления (минуты)</string>
     <string name="path_scripts">Обработчик скриптов</string>
     <string name="path_voice">Обработчик голосовых команд</string>
     <string name="path_tracker">Обработчик GPS</string>

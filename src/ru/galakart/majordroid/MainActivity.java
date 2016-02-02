@@ -13,8 +13,9 @@ import java.io.PrintWriter;
 
 import java.io.File;
 
-import java.util.LinkedList;
-import java.util.Queue;
+//import java.util.LinkedList;
+//import java.util.Queue;
+import java.util.Locale;
 
 
 import java.net.ServerSocket;
@@ -68,11 +69,13 @@ import android.hardware.Camera;
 import android.hardware.Camera.Face;
 import android.hardware.Camera.FaceDetectionListener;
 
-import android.hardware.Camera;
+
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+
+import android.speech.tts.TextToSpeech;
 
 
 import android.media.AudioManager;
@@ -91,12 +94,54 @@ import edu.cmu.pocketsphinx.SpeechRecognizer;
 import edu.cmu.pocketsphinx.SpeechRecognizerSetup;
 
 
+
 public class MainActivity extends Activity implements RecognitionListener, SensorEventListener {
+	
+	protected class ReloadWebView extends TimerTask {
+	    Activity context;
+	    Timer timer;
+	    WebView wv;
+
+	    public ReloadWebView(Activity context, int seconds, WebView wv) {
+	        this.context = context;
+	        this.wv = wv;
+
+	        timer = new Timer();
+	        /* execute the first task after seconds */
+	        timer.schedule(this,
+	                seconds * 1000,  // initial delay
+	                seconds * 1000); // subsequent rate
+	    }
+
+	    public void cancelTimer() {
+	    	timer.cancel();
+	    }
+	    
+	    @Override
+	    public void run() {
+	        if(context == null || context.isFinishing()) {
+	            // Activity killed
+	            this.cancel();
+	            return;
+	        }
+
+	        context.runOnUiThread(new Runnable() {
+	            @Override
+	            public void run() {
+	                wv.reload();
+	            }
+	        });
+	    }
+	}	
+	
 	private static final String TAG = MainActivity.class.getSimpleName();
 	
+	
+	private ReloadWebView reloadWebViewTimer;
 	private WebView mWebView;
 	private WebView webPost;
 	private ProgressBar Pbar;
+	private int update_period = 0;
 	private String localURL = "", globalURL = "", serverURL = "", login = "",
 			passw = "", wifiHomeNet = "", pathHomepage = "", pathVoice = "", pathQR="", pathGps = "";
 	private String tmpDostupAccess = "";
@@ -111,6 +156,10 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 	private static final int REQUEST_CODE_QR = 1237;	
 	private static final int VOICE_INPUT_TIMIOUT_MILLIS = 10000;
 	private String gpsTimeOut;
+	
+	private boolean reloadTimerOn = false;
+	
+
 	private Timer timer;
 	private TimerTask doAsynchronousTask;
 	private Handler delayHandler;
@@ -143,6 +192,8 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
     ProgressDialog dialog;
     private int serverResponseCode=0;
     private String activityResultString="";
+    
+    private TextToSpeech tts1;
     
 
     private FaceDetectionListener faceDetectionListener = new FaceDetectionListener() {
@@ -223,7 +274,6 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
             @Override
             public void run() {
                 handler.post(new Runnable() {
-                    @SuppressWarnings("unchecked")
                     public void run() {
                         try {
                             gpsSend();
@@ -233,6 +283,24 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
                 });
             }
         };
+        
+
+		
+        tts1=new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+               if(status != TextToSpeech.ERROR) {
+            	   //Locale locale = new Locale("ru");
+            	   int result = tts1.setLanguage(Locale.getDefault());
+            	   
+       			if (result == TextToSpeech.LANG_MISSING_DATA
+    					|| result == TextToSpeech.LANG_NOT_SUPPORTED) {
+    				Log.e("TTS", "Sorry, tts is not supported");
+    			}            	   
+            	   
+               }
+            }
+         });     
         
         
         
@@ -539,7 +607,12 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 			return true;			
 
 		case R.id.action_quit:
-		    timer.cancel();
+			if (timerOn) {
+			    timer.cancel();				
+			}
+			if (reloadTimerOn) {
+				//reloadTimer.cancel();
+			}		    
 		    if (mRecognizer != null) {
 		    	mRecognizer.stop();
 		    	mRecognizer.cancel();
@@ -622,7 +695,7 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
                         if (contantsString.startsWith("http")) {
                         	mWebView.loadUrl(contantsString);
                         } else {
-                        	mWebView.loadUrl("http://" + serverURL + pathQR + contantsString);
+                        	mWebView.loadUrl(getServerURL(serverURL) + pathQR + contantsString);
                         }
                 }
 
@@ -810,8 +883,8 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 			tmpDostupAccess = dostup;
 		}
 		
-		uploadURL="http://" + serverURL + prefs.getString(getString(R.string.path_video), "");
-		faceURL="http://" + serverURL + prefs.getString(getString(R.string.path_face), "");
+		uploadURL=getServerURL(serverURL) + prefs.getString(getString(R.string.path_video), "");
+		faceURL=getServerURL(serverURL) + prefs.getString(getString(R.string.path_face), "");
 		
 		if (!serverURL.equals(tmpAdressAccess))
 			firstLoad = false;
@@ -828,7 +901,7 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 				toast.setText("Не задан адрес сервера в настройках");
 				toast.show();
 			} else {
-				mWebView.loadUrl("http://" + serverURL + pathHomepage);
+				mWebView.loadUrl(getServerURL(serverURL) + pathHomepage);
 				
 				// потом использовать reload();
 
@@ -839,6 +912,34 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 				tmpAdressAccess = serverURL;
 			}
 		}
+		
+		update_period = Integer.parseInt(prefs.getString(getString(R.string.homepage_period), "0"));
+		
+		if (reloadTimerOn) {
+			//reloadTimer.cancel();
+			reloadWebViewTimer.cancelTimer();
+		}
+		
+		if (update_period>0) {
+			Log.i(TAG, "Force reload timer started "+update_period);
+			reloadTimerOn = true;
+			/*
+			reloadTimer = new Timer();
+			reloadTimer.schedule(new TimerTask() {          
+			    @Override
+			    public void run() {
+	 			    Log.i(TAG, "Force reload task activated");
+	 			    mWebView.loadUrl(getServerURL(serverURL) + pathHomepage);
+      
+			    }
+			}, update_period * 60 * 1000L, update_period * 60 * 1000L);
+			*/
+			reloadWebViewTimer=new ReloadWebView(this, update_period*60, mWebView);
+		} else {
+			reloadTimerOn = false;
+		}
+		
+		
 		gpsTimeOut = prefs.getString(getString(R.string.gps_period), "5");
 		if ((prefs.getString(getString(R.string.gps_switch), "Выкл").equals("Вкл")) && (!timerOn)) {
 			timer.schedule(doAsynchronousTask, 0,
@@ -863,7 +964,8 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		
-		if (prefs.getString(getString(R.string.facedetection), "off").equals("on")) {
+
+  		if (prefs.getString(getString(R.string.facedetection), "off").equals("on")) {
 			faceDetectionEnable=true;
 			if (!faceDetectionWorking) {
 			 int cameraId=0;
@@ -903,7 +1005,7 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 	}
 	
 	private void turnOffFaceDetectionCamera() {
-		if (faceDetectionWorking) { 
+		if (faceDetectionWorking) {
 		 mCamera.setFaceDetectionListener(null);
 		 mCamera.setErrorCallback(null);
 		 mCamera.stopPreview();
@@ -948,6 +1050,12 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 			mWebView.loadUrl(url);
 		}
 		
+		if (command.startsWith("tts:")) {
+			String toSpeak=command;
+			toSpeak=toSpeak.replace("tts:", "");			
+			tts1.speak(toSpeak, TextToSpeech.QUEUE_FLUSH, null);
+		}
+		
 		if (command.equals("pause")) {
 			if (mediaPlayer.isPlaying())
                 mediaPlayer.pause();
@@ -959,7 +1067,7 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 			try {
 				mediaPlayer.setDataSource(url);
 				mediaPlayer.prepare();
-				mediaPlayer.start();				
+				mediaPlayer.start();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -974,10 +1082,20 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 		toast.show();		
 	}
 	
+	private String getServerURL(String url) {
+		String resURL;
+		if (url.startsWith("http")) {
+			resURL=url;
+		} else {
+			resURL="http://" + url;
+		}
+		return resURL;
+	}
+	
 	private void voiceCommand(String command) {
 
 		disableFacePost=true;
-		webPost.loadUrl("http://" + serverURL + pathVoice + command);
+		webPost.loadUrl(getServerURL(serverURL) + pathVoice + command);
 
 
    		Toast toast = Toast.makeText(getApplicationContext(), command,
@@ -1000,7 +1118,7 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 	           HttpGet request = new HttpGet();
 	           String authorizationString = "Basic " + Base64.encodeToString((login + ":" + passw).getBytes(),Base64.NO_WRAP);	           
 	           request.setHeader("Authorization", authorizationString);
-	           URI website = new URI("http://" + serverURL + pathVoice + URLEncoder.encode(command,"UTF-8"));                     
+	           URI website = new URI(getServerURL(serverURL) + pathVoice + URLEncoder.encode(command,"UTF-8"));                     
 	           request.setURI(website);	                     	           
 	           httpclient.execute(request);
 	       }catch(Exception e){
@@ -1192,7 +1310,7 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
 				Secure.ANDROID_ID);
 		String battlevel = Integer.toString(batteryIntent.getIntExtra(
 				BatteryManager.EXTRA_LEVEL, -1));
-		String gpsUrl = "http://" + serverURL + pathGps + "?";
+		String gpsUrl = getServerURL(serverURL) + pathGps + "?";
 
 		if (latitude != 0)
 			gpsUrl += "latitude=" + latitude + "&";

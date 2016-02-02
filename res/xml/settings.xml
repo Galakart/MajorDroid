@@ -42,6 +42,13 @@
                 android:defaultValue="/menu.html"
                 android:key="@string/path_homepage"
                 android:title="@string/path_homepage" />
+            
+<EditTextPreference
+                android:defaultValue="0"
+                android:key="@string/homepage_period"
+                android:title="@string/homepage_period" 
+                android:summary="@string/homepage_period_summary" />           
+            
             <EditTextPreference
                 android:defaultValue="/objects/?script="
                 android:key="@string/path_scripts"
