@@ -1,0 +1,78 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:orientation="vertical">
+
+        <TableLayout
+            android:id="@+id/homeTableLay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:shrinkColumns="*"
+            android:stretchColumns="*">
+
+            <TableRow>
+
+                <ImageView
+                    android:id="@+id/imgb_home"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="imgb_home_click"
+                    android:src="@drawable/ic_action_home"/>
+
+                <ImageView
+                    android:id="@+id/imgb_voice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="imgb_voice_click"
+                    android:src="@drawable/ic_action_voice"/>
+
+                <ImageView
+                    android:id="@+id/imgb_pult"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="imgb_pult_click"
+                    android:src="@drawable/ic_action_pult"/>
+
+                <ImageView
+                    android:id="@+id/imgb_qr"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="imgb_qr_click"
+                    android:src="@drawable/ic_action_qr"/>
+
+                <ImageView
+                    android:id="@+id/imgb_settings"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="imgb_settings_click"
+                    android:src="@drawable/ic_action_settings"/>
+            </TableRow>
+        </TableLayout>
+
+        <ProgressBar
+            android:id="@+id/pB1"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="5dp"
+            android:layout_centerVertical="true"
+            android:padding="1dip"/>
+
+        <WebView
+            android:id="@+id/webview"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"/>
+
+        <WebView
+            android:id="@+id/webPost"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="invisible"/>
+    </LinearLayout>
+
+</LinearLayout>

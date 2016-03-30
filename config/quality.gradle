@@ -1,0 +1,53 @@
+repositories {
+    mavenCentral()
+}
+apply plugin: 'checkstyle'
+apply plugin: 'findbugs'
+
+afterEvaluate { project ->
+    def variants = []
+    if (getPlugins().hasPlugin('com.android.application')) {
+        variants = android.applicationVariants
+    }
+    if (getPlugins().hasPlugin('com.android.library')) {
+        variants = android.libraryVariants
+    }
+    variants.all { variant ->
+        def name = variant.getName()
+        def compileTask = variant.javaCompile
+
+        // http://www.gradle.org/docs/current/dsl/org.gradle.api.plugins.quality.FindBugs.html
+        def findbugsTask = tasks.create(name: "findbugs${name.capitalize()}", type: FindBugs, dependsOn: compileTask) {
+            group 'verification'
+            description "Run findbugs for $name sources"
+
+            effort = 'max'
+            ignoreFailures = true
+            classes = fileTree(compileTask.destinationDir)
+            source = files(compileTask.source)
+            classpath = compileTask.classpath.plus(project.files(android.bootClasspath))
+            excludeFilter = file("${project.rootDir}/config/findbugs-filter.xml")
+            reports {
+                xml.enabled = true
+                html.enabled = false
+            }
+        }
+
+        // http://www.gradle.org/docs/current/dsl/org.gradle.api.plugins.quality.Checkstyle.html
+        def checkstyleTask = tasks.create(name: "checkstyle${name.capitalize()}", type: Checkstyle, dependsOn: compileTask) {
+            group 'verification'
+            description "Run checkstyle for $name sources"
+
+            ignoreFailures = true
+            configFile = file("${project.rootDir}/config/checkstyle.xml")
+
+            classpath = project.fileTree(compileTask.destinationDir)
+            source compileTask.source
+            exclude('**/BuildConfig.java')
+            exclude('**/R.java')
+            exclude('**/Manifest.java')
+        }
+
+        tasks.getByName("check").dependsOn findbugsTask, checkstyleTask
+    }
+}
