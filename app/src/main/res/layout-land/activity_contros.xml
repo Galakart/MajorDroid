@@ -1,0 +1,103 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:layout_gravity="center"
+              android:orientation="vertical"
+              android:paddingLeft="10dip"
+              android:paddingRight="10dip">
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:shrinkColumns="*"
+        android:stretchColumns="*">
+
+        <TableRow>
+
+            <ImageView
+                android:id="@+id/imgb_script1"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:onClick="imgb_script1_exec"
+                android:src="@drawable/cooltext1"/>
+
+            <ImageView
+                android:id="@+id/imgb_script2"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:onClick="imgb_script2_exec"
+                android:src="@drawable/cooltext2"/>
+
+            <ImageView
+                android:id="@+id/imgb_script3"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:onClick="imgb_script3_exec"
+                android:src="@drawable/cooltext3"/>
+        </TableRow>
+
+        <TableRow>
+
+            <ImageView
+                android:id="@+id/imgb_script4"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:onClick="imgb_script4_exec"
+                android:src="@drawable/cooltext4"/>
+
+            <ImageView
+                android:id="@+id/imgb_script5"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:onClick="imgb_script5_exec"
+                android:src="@drawable/cooltext5"/>
+
+            <ImageView
+                android:id="@+id/imgb_script6"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:onClick="imgb_script6_exec"
+                android:src="@drawable/cooltext6"/>
+        </TableRow>
+
+        <TableRow>
+
+            <ImageView
+                android:id="@+id/imgb_script7"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:onClick="imgb_script7_exec"
+                android:src="@drawable/cooltext7"/>
+
+            <ImageView
+                android:id="@+id/imgb_script8"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:onClick="imgb_script8_exec"
+                android:src="@drawable/cooltext8"/>
+
+            <ImageView
+                android:id="@+id/imgb_script9"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:onClick="imgb_script9_exec"
+                android:src="@drawable/cooltext9"/>
+        </TableRow>
+
+        <TextView
+            android:id="@+id/textView_legend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:scrollbars="vertical"/>
+    </TableLayout>
+
+    <WebView
+        android:id="@+id/webPost"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:visibility="invisible"/>
+
+
+</LinearLayout>
