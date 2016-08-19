@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest
-    package="ru.galakart.majordroid"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+<manifest package="ru.galakart.majordroid"
+          xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools"
+    >
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
@@ -17,13 +16,15 @@
     <uses-feature android:name="android.hardware.camera"/>
     <uses-feature android:name="android.hardware.camera.autofocus"/>
 
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@android:style/Theme.Black.NoTitleBar"
-        tools:ignore="GoogleAppIndexingWarning">
 
+        tools:ignore="GoogleAppIndexingWarning">
         <activity
             android:name=".MainActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
@@ -50,6 +51,20 @@
             android:name=".VideoRecordActivity"
             android:label="@string/title_activity_video_record">
         </activity>
+
+        <service android:name=".NetworkService"/>
+
+        <service android:name=".WearService">
+            <intent-filter>
+
+                <!-- <action android:name="com.google.android.gms.wearable.BIND_LISTENER"/> -->
+                <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED"/>
+
+                <data
+                    android:host="*"
+                    android:scheme="wear"/>
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

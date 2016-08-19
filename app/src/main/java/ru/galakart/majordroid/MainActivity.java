@@ -25,12 +25,14 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.BatteryManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.Settings.Secure;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.TextToSpeech.OnUtteranceCompletedListener;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -68,6 +70,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Timer;
@@ -121,6 +124,7 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
     private boolean voiceKeywordWorking = false;
     private boolean voiceGoogleInProgress = false;
     private boolean disableFacePost = false;
+    private boolean needAsk = false;
     private MediaPlayer mediaPlayer;
     private String qrCameraSet;
     private Camera mCamera;
@@ -220,21 +224,40 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
         };
 
 
-        tts1 = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
-            @Override
-            public void onInit(int status) {
-                if (status != TextToSpeech.ERROR) {
-                    //Locale locale = new Locale("ru");
-                    int result = tts1.setLanguage(Locale.getDefault());
 
-                    if (result == TextToSpeech.LANG_MISSING_DATA
-                            || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                        Log.e("TTS", "Sorry, tts is not supported");
+            tts1 = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+                @Override
+                public void onInit(int status) {
+                    if (status != TextToSpeech.ERROR) {
+                        //Locale locale = new Locale("ru");
+                        int result = tts1.setLanguage(Locale.getDefault());
+
+                        if (result == TextToSpeech.LANG_MISSING_DATA
+                                || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                            Log.e("TTS", "Sorry, tts is not supported");
+                        } else {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.DONUT) {
+                                tts1.setOnUtteranceCompletedListener(new OnUtteranceCompletedListener() {
+                                    @Override
+                                    public void onUtteranceCompleted(String utteranceId) {
+                                        if (needAsk) {
+                                            needAsk=false;
+                                            runOnUiThread(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    //UI changes
+                                                    imgb_voice_click(null);
+                                                }
+                                            });
+                                        }
+                                    }
+                                });
+                            }//...
+                        }
+
                     }
-
                 }
-            }
-        });
+            });
 
 
         SharedPreferences prefs = PreferenceManager
@@ -289,7 +312,7 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
             mSensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_FASTEST);
             mSensorMaximum = sensor.getMaximumRange();
         }
-        delayHandler = new android.os.Handler();
+        delayHandler = new Handler();
 
         mediaPlayer = new MediaPlayer();
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
@@ -898,6 +921,16 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
             tts1.speak(toSpeak, TextToSpeech.QUEUE_FLUSH, null);
         }
 
+        if (command.startsWith("ask:")) {
+            String toSpeak = command;
+            toSpeak = toSpeak.replace("ask:", "");
+            needAsk=true;
+            HashMap<String, String> params = new HashMap<String, String>();
+            params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID,"stringId");
+            tts1.speak(toSpeak, TextToSpeech.QUEUE_FLUSH, params);
+
+        }
+
         if (command.equals("pause")) {
             if (mediaPlayer.isPlaying())
                 mediaPlayer.pause();
@@ -1042,7 +1075,7 @@ public class MainActivity extends Activity implements RecognitionListener, Senso
     public void imgb_voice_click(View v) {
 
         if (voiceGoogleInProgress) return;
-
+        needAsk=false;
         PackageManager pm = getPackageManager();
         List<ResolveInfo> activities = pm.queryIntentActivities(new Intent(
                 RecognizerIntent.ACTION_RECOGNIZE_SPEECH), 0);
