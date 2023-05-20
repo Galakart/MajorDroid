@@ -1,0 +1,112 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:orientation="vertical"
+    android:background="@android:color/black"
+    android:paddingLeft="10dip"
+    android:paddingRight="10dip" >
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:shrinkColumns="*"
+        android:stretchColumns="*" >
+
+        <TableRow>
+
+            <ImageView
+                android:id="@+id/imgb_script1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="imgbScript1Exec"
+                android:src="@drawable/cooltext1"
+                android:contentDescription="@string/imgdescription" />
+
+            <ImageView
+                android:id="@+id/imgb_script2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="imgbScript2Exec"
+                android:src="@drawable/cooltext2"
+                android:contentDescription="@string/imgdescription" />
+
+            <ImageView
+                android:id="@+id/imgb_script3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="imgbScript3Exec"
+                android:src="@drawable/cooltext3"
+                android:contentDescription="@string/imgdescription" />
+        </TableRow>
+
+        <TableRow>
+
+            <ImageView
+                android:id="@+id/imgb_script4"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:onClick="imgbScript4Exec"
+                android:src="@drawable/cooltext4"
+                android:contentDescription="@string/imgdescription" />
+
+            <ImageView
+                android:id="@+id/imgb_script5"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:onClick="imgbScript5Exec"
+                android:src="@drawable/cooltext5"
+                android:contentDescription="@string/imgdescription" />
+
+            <ImageView
+                android:id="@+id/imgb_script6"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:onClick="imgbScript6Exec"
+                android:src="@drawable/cooltext6"
+                android:contentDescription="@string/imgdescription" />
+        </TableRow>
+
+        <TableRow>
+
+            <ImageView
+                android:id="@+id/imgb_script7"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:onClick="imgbScript7Exec"
+                android:src="@drawable/cooltext7"
+                android:contentDescription="@string/imgdescription" />
+
+            <ImageView
+                android:id="@+id/imgb_script8"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:onClick="imgbScript8Exec"
+                android:src="@drawable/cooltext8"
+                android:contentDescription="@string/imgdescription" />
+
+            <ImageView
+                android:id="@+id/imgb_script9"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:onClick="imgbScript9Exec"
+                android:src="@drawable/cooltext9"
+                android:contentDescription="@string/imgdescription" />
+        </TableRow>
+
+        <TextView
+            android:id="@+id/tvLegend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:scrollbars="vertical"
+            android:textColor="@android:color/white" />
+    </TableLayout>
+
+    <WebView
+        android:id="@+id/webPost"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:visibility="invisible" />
+
+</LinearLayout>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black"
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:orientation="vertical">
+
+        <TableLayout
+            android:id="@+id/homeTableLay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:shrinkColumns="*"
+            android:stretchColumns="*">
+
+            <TableRow tools:ignore="UselessParent">
+
+                <ImageView
+                    android:id="@+id/imgb_home"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="imgbHomeClick"
+                    android:src="@drawable/ic_action_home"
+                    android:contentDescription="@string/imgdescription" />
+
+                <ImageView
+                    android:id="@+id/imgb_voice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="imgbVoiceClick"
+                    android:src="@drawable/ic_action_voice"
+                    android:contentDescription="@string/imgdescription" />
+
+                <ImageView
+                    android:id="@+id/imgb_pult"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="imgbPultClick"
+                    android:src="@drawable/ic_action_pult"
+                    android:contentDescription="@string/imgdescription" />
+
+                <ImageView
+                    android:id="@+id/imgb_settings"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="imgbSettingsClick"
+                    android:src="@drawable/ic_action_settings"
+                    android:contentDescription="@string/imgdescription" />
+            </TableRow>
+        </TableLayout>
+
+        <ProgressBar
+            android:id="@+id/pBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="5dp"
+            android:padding="1dip" />
+
+        <WebView
+            android:id="@+id/webView"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent" />
+
+        <WebView
+            android:id="@+id/webPost"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="invisible" />
+    </LinearLayout>
+
+</android.support.constraint.ConstraintLayout>

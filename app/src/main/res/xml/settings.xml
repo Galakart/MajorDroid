@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <ListPreference
+        android:defaultValue="1"
+        android:dialogTitle="@string/mode"
+        android:entries="@array/accessArray"
+        android:entryValues="@array/accessValues"
+        android:key="access"
+        android:summary="@string/access_summary"
+        android:title="@string/access" />
+    <ListPreference
+        android:defaultValue="1"
+        android:dialogTitle="@string/view"
+        android:entries="@array/viewArray"
+        android:entryValues="@array/viewValues"
+        android:key="view"
+        android:summary="@string/view_summary"
+        android:title="@string/view" />
+
+    <PreferenceCategory android:title="@string/serversettings" >
+        <EditTextPreference
+            android:dialogTitle="@string/serveraddress"
+            android:key="localaddress"
+            android:summary="@string/localaddress_summary"
+            android:title="@string/localaddress" />
+        <EditTextPreference
+            android:dialogTitle="@string/serveraddress"
+            android:key="globaladdress"
+            android:summary="@string/globaladdress_summary"
+            android:title="@string/globaladdress" />
+
+        <Preference
+            android:key="buttonWifiHomeNet"
+            android:summary="@string/wifihomenet_summary"
+            android:title="@string/wifihomenet" />
+
+        <PreferenceScreen
+            android:summary="@string/systempaths_summary"
+            android:title="@string/systempaths" >
+            <EditTextPreference
+                android:defaultValue="@string/homepage_default"
+                android:key="homepage"
+                android:title="@string/homepage" />
+            <EditTextPreference
+                android:defaultValue="@string/scriptprocessor_default"
+                android:key="scriptprocessor"
+                android:title="@string/scriptprocessor" />
+            <EditTextPreference
+                android:defaultValue="@string/voiceprocessor_default"
+                android:key="voiceprocessor"
+                android:title="@string/voiceprocessor" />
+        </PreferenceScreen>
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/user" >
+        <EditTextPreference
+            android:dialogTitle="@string/login"
+            android:key="login"
+            android:summary="@string/login_summary"
+            android:title="@string/login" />
+        <EditTextPreference
+            android:dialogTitle="@string/passw"
+            android:inputType="textPassword"
+            android:key="passw"
+            android:summary="@string/passw_summary"
+            android:title="@string/passw" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/services" >
+        <PreferenceScreen
+            android:summary="@string/binding_summary"
+            android:title="@string/binding" >
+            <PreferenceCategory android:title="@string/binding_title" >
+                <EditTextPreference
+                    android:dialogTitle="@string/scriptname"
+                    android:key="scriptname1"
+                    android:title="@string/scriptbutton1" />
+                <EditTextPreference
+                    android:dialogTitle="@string/scriptname"
+                    android:key="scriptname2"
+                    android:title="@string/scriptbutton2" />
+                <EditTextPreference
+                    android:dialogTitle="@string/scriptname"
+                    android:key="scriptname3"
+                    android:title="@string/scriptbutton3" />
+                <EditTextPreference
+                    android:dialogTitle="@string/scriptname"
+                    android:key="scriptname4"
+                    android:title="@string/scriptbutton4" />
+                <EditTextPreference
+                    android:dialogTitle="@string/scriptname"
+                    android:key="scriptname5"
+                    android:title="@string/scriptbutton5" />
+                <EditTextPreference
+                    android:dialogTitle="@string/scriptname"
+                    android:key="scriptname6"
+                    android:title="@string/scriptbutton6" />
+                <EditTextPreference
+                    android:dialogTitle="@string/scriptname"
+                    android:key="scriptname7"
+                    android:title="@string/scriptbutton7" />
+                <EditTextPreference
+                    android:dialogTitle="@string/scriptname"
+                    android:key="scriptname8"
+                    android:title="@string/scriptbutton8" />
+                <EditTextPreference
+                    android:key="scriptname9"
+                    android:title="@string/scriptbutton9" />
+            </PreferenceCategory>
+        </PreferenceScreen>
+    </PreferenceCategory>
+
+</PreferenceScreen>

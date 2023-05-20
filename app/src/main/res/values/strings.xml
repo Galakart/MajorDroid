@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MajorDroid Minimal</string>
+    <string name="on">Вкл</string>
+    <string name="off">Выкл</string>
+    <string name="plain">Обычный</string>
+    <string name="fullscreen">Полноэкранный</string>
+    <string name="megafullscreen">Полноэкранный (без панели кнопок)</string>
+    <string name="local">Локальный</string>
+    <string name="global">Глобальный</string>
+    <string name="automatic">Автоматический</string>
+    <string name="about">О программе</string>
+    <string name="quit">Выход</string>
+    <string name="settings">Настройки</string>
+    <string name="mode">Режим</string>
+    <string name="access">Режим доступа</string>
+    <string name="access_summary">По локальной или глобальной сети</string>
+    <string name="view">Интерфейс</string>
+    <string name="view_summary">Обычный или полноэкранный</string>
+    <string name="serversettings">Настройки сервера</string>
+    <string name="serveraddress">Адрес сервера (без http://)</string>
+    <string name="localaddress">Локальный адрес</string>
+    <string name="localaddress_summary">Адрес сервера в локальной сети</string>
+    <string name="globaladdress">Глобальный адрес</string>
+    <string name="globaladdress_summary">Внешний адрес сервера</string>
+    <string name="wifihomenet">Домашняя WiFi-сеть</string>
+    <string name="wifihomenet_summary">Для автоматического переключения адреса сервера</string>
+    <string name="systempaths">Системные пути</string>
+    <string name="systempaths_summary">Пути к домашней странице и скриптам. Не изменять без надобности</string>
+    <string name="homepage">Домашняя страница</string>
+    <string name="homepage_default">/menu.html</string>
+    <string name="scriptprocessor">Обработчик скриптов</string>
+    <string name="scriptprocessor_default">/objects/?script=</string>
+    <string name="voiceprocessor">Обработчик голосовых команд</string>
+    <string name="voiceprocessor_default">/command.php?qry=</string>
+    <string name="user">Пользователь</string>
+    <string name="login">Логин</string>
+    <string name="login_summary">Имя для внешнего доступа</string>
+    <string name="passw">Пароль</string>
+    <string name="passw_summary">Пароль для внешнего доступа</string>
+    <string name="services">Сервисы</string>
+    <string name="contros">Пульт управления</string>
+    <string name="imgdescription">logo</string>
+    <string name="binding">Привязка кнопок пульта</string>
+    <string name="binding_summary">Устанавливает выполнение скриптов MajorDomo на выбранные кнопки</string>
+    <string name="binding_title">Привяжите выбранную кнопку на скрипт MajorDomo</string>
+    <string name="scriptname">Название скрипта в MajorDomo:</string>
+    <string name="scriptbutton1">Кнопка 1</string>
+    <string name="scriptbutton2">Кнопка 2</string>
+    <string name="scriptbutton3">Кнопка 3</string>
+    <string name="scriptbutton4">Кнопка 4</string>
+    <string name="scriptbutton5">Кнопка 5</string>
+    <string name="scriptbutton6">Кнопка 6</string>
+    <string name="scriptbutton7">Кнопка 7</string>
+    <string name="scriptbutton8">Кнопка 8</string>
+    <string name="scriptbutton9">Кнопка 9</string>
+    <string name="about_url">v1.5 http://smartliving.ru</string>
+    <string name="rateinmarket">Оценить в маркете</string>
+    <string name="about_info">Приложение для управления сервером умного дома MajorDomo.\n\nЛицензия Beerware - каждый довольный пользователь может выпить пива в честь автора android-приложения</string>
+    <string name="noscript">Скрипт не задан</string>
+    <string name="scriptok">Скрипт выполнен</string>
+    <string name="scriptnotset">Кнопка не привязана к скрипту.\nЗадайте имя скрипта в настройках</string>
+    <string name="back">Назад</string>
+    <string name="cancel">Отмена</string>
+    <string name="message">Сообщение</string>
+    <string name="save">Сохранить</string>
+    <string name="wifiisoff">WiFi выключен или нет соединения</string>
+    <string name="wifialreadyset">Текущая WiFi-сеть совпадает с занесённой в память. Для записи другой домашней сети, подключитесь к ней</string>
+    <string name="wifititle">Выбор домашней Wifi-сети</string>
+    <string name="wifisetto">Установить домашнюю сеть на </string>
+    <string name="wificurrentnet">Текущая домашняя сеть: </string>
+    <string name="wifichoseto">Поменять её на </string>
+    <string name="wifisaved">Сеть сохранена</string>
+    <string name="speechtip">Произнесите команду</string>
+
+</resources>
