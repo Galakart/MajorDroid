@@ -1,32 +1,66 @@
-apply plugin: 'com.android.application'
-
-apply plugin: 'kotlin-android'
-
-apply plugin: 'kotlin-android-extensions'
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+}
 
 android {
-    compileSdkVersion 26
+    namespace 'ru.galakart.majordroid'
+    compileSdk = 36
+
+    buildFeatures {
+        buildConfig true
+    }
+
     defaultConfig {
         applicationId "ru.galakart.majordroid"
-        minSdkVersion 22
-        targetSdkVersion 26
-        versionCode 7
-        versionName "2.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        minSdk 26
+        versionCode 8
+        versionName "2.1"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        targetSdk 35
     }
+
     buildTypes {
+        debug {
+
+        }
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+    }
+
+    // Включаем View Binding вместо синтетического доступа
+    buildFeatures {
+        viewBinding = true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = '17'
     }
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation"org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
-    implementation 'com.android.support.constraint:constraint-layout:1.1.0'
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    implementation libs.core
+
+    implementation libs.constraintlayout
+    implementation libs.androidx.constraintlayout
+    implementation libs.androidx.appcompat
+    implementation libs.androidx.core.ktx
+
+    testImplementation libs.junit
+    androidTestImplementation libs.ext.junit
+    androidTestImplementation libs.espresso.core
+
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
 }
