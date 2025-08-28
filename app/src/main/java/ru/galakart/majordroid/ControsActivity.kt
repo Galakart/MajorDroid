@@ -13,9 +13,11 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
-import kotlinx.android.synthetic.main.activity_contros.*
+import androidx.appcompat.app.AppCompatActivity
+import ru.galakart.majordroid.databinding.ActivityControsBinding
 
-class ControsActivity : Activity() {
+class ControsActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityControsBinding
     private var serverURL = ""
     private var login = ""
     private var passw = ""
@@ -25,7 +27,8 @@ class ControsActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_contros)
+        binding = ActivityControsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         setScreenAndComponents()
     }
 
@@ -58,18 +61,18 @@ class ControsActivity : Activity() {
                 window.clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN)
             }
         }
-        webPost!!.webViewClient = MajorDroidWebViewer()
-        tvLegend!!.movementMethod = ScrollingMovementMethod()
+        binding.webPost!!.webViewClient = MajorDroidWebViewer()
+        binding.tvLegend!!.movementMethod = ScrollingMovementMethod()
     }
 
     private fun loadSettings() {
         var prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        val localURL = prefs!!.getString("localaddress", "")
-        val globalURL = prefs!!.getString("globaladdress", "")
-        val dostup = prefs!!.getString("access", "")
-        login = prefs!!.getString("login", "")
-        passw = prefs!!.getString("passw", "")
-        pathScripts = prefs!!.getString("scriptprocessor", "")
+        val localURL = prefs!!.getString("localaddress", "") ?: ""
+        val globalURL = prefs!!.getString("globaladdress", "") ?: ""
+        val dostup = prefs!!.getString("access", "") ?: ""
+        login = prefs!!.getString("login", "") ?: ""
+        passw = prefs!!.getString("passw", "") ?: ""
+        pathScripts = prefs!!.getString("scriptprocessor", "") ?: ""
         scriptnames[0] = prefs!!.getString("scriptname1", "")
         scriptnames[1] = prefs!!.getString("scriptname2", "")
         scriptnames[2] = prefs!!.getString("scriptname3", "")
@@ -96,7 +99,7 @@ class ControsActivity : Activity() {
             else
                 (i + 1).toString() + ". " + getString(R.string.noscript) + ".\n"
         }
-        tvLegend!!.text = legend
+        binding.tvLegend!!.text = legend
     }
 
     fun View.imgbScript1Exec() {
@@ -137,7 +140,7 @@ class ControsActivity : Activity() {
 
     private fun scriptExec(script: String?) {
         if (!script.isNullOrEmpty()) {
-            webPost!!.loadUrl("http://$serverURL$pathScripts$script")
+            binding.webPost!!.loadUrl("http://$serverURL$pathScripts$script")
             val toast = Toast.makeText(
                             applicationContext,
                        getString(R.string.scriptok) + "($script)",

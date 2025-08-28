@@ -11,13 +11,18 @@ import android.view.*
 import android.webkit.*
 import android.widget.ProgressBar
 import android.widget.Toast
-import kotlinx.android.synthetic.main.activity_main.*
 import android.content.ActivityNotFoundException
 import android.speech.RecognizerIntent
 import java.util.*
 import android.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.ViewCompat
+import androidx.core.view.updateLayoutParams
+import ru.galakart.majordroid.databinding.ActivityMainBinding
 
-class MainActivity : Activity() {
+class MainActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityMainBinding
 
     private val REQ_CODE_SPEECH_INPUT = 100
     private var serverURL = ""
@@ -33,7 +38,8 @@ class MainActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         setComponents()
         showFirstStartTip()
     }
@@ -46,8 +52,8 @@ class MainActivity : Activity() {
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-        if (keyCode == KeyEvent.KEYCODE_BACK && webView!!.canGoBack()) {
-            webView!!.goBack()
+        if (keyCode == KeyEvent.KEYCODE_BACK && binding.webView!!.canGoBack()) {
+            binding.webView!!.goBack()
             return true
         }
         return super.onKeyDown(keyCode, event)
@@ -90,18 +96,18 @@ class MainActivity : Activity() {
     }
 
     private fun setComponents() {
-        webView!!.settings.javaScriptEnabled = true
-        webView!!.settings.cacheMode = WebSettings.LOAD_NO_CACHE
-        webView!!.webViewClient = MajorDroidWebViewer()
+        binding.webView!!.settings.javaScriptEnabled = true
+        binding.webView!!.settings.cacheMode = WebSettings.LOAD_NO_CACHE
+        binding.webView!!.webViewClient = MajorDroidWebViewer()
 
-        webView!!.webChromeClient = object : WebChromeClient() {
+        binding.webView!!.webChromeClient = object : WebChromeClient() {
             override fun onProgressChanged(view: WebView, progress: Int) {
-                if (progress < 100 && pBar!!.visibility == ProgressBar.INVISIBLE) {
-                    pBar!!.visibility = ProgressBar.VISIBLE
+                if (progress < 100 && binding.pBar!!.visibility == ProgressBar.INVISIBLE) {
+                    binding.pBar!!.visibility = ProgressBar.VISIBLE
                 }
-                pBar!!.progress = progress
+                binding.pBar!!.progress = progress
                 if (progress == 100) {
-                    pBar!!.visibility = ProgressBar.INVISIBLE
+                    binding.pBar!!.visibility = ProgressBar.INVISIBLE
                 }
             }
         }
@@ -114,31 +120,31 @@ class MainActivity : Activity() {
             "1" -> {
                 window.addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN)
                 window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
-                homeTableLay.visibility = View.VISIBLE
+                binding.homeTableLay.visibility = View.VISIBLE
             }
             "2" -> {
                 window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
                 window.clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN)
-                homeTableLay.visibility = View.VISIBLE
+                binding.homeTableLay.visibility = View.VISIBLE
             }
             "3" -> {
                 window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
                 window.clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN)
-                homeTableLay.visibility = View.GONE
+                binding.homeTableLay.visibility = View.GONE
             }
         }
     }
 
     private fun loadSettings() {
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        val localURL = prefs.getString("localaddress", "")
-        val globalURL = prefs.getString("globaladdress", "")
-        pathHomepage = prefs.getString("homepage", "")
-        pathVoice = prefs.getString("voiceprocessor", "")
-        login = prefs.getString("login", "")
-        passw = prefs.getString("passw", "")
-        val dostup = prefs.getString("access", "")
-        val wifiHomeNet = prefs.getString("wifihomenet", "")
+        val localURL = prefs.getString("localaddress", "") ?: ""
+        val globalURL = prefs.getString("globaladdress", "") ?: ""
+        pathHomepage = prefs.getString("homepage", "") ?: ""
+        pathVoice = prefs.getString("voiceprocessor", "") ?: ""
+        login = prefs.getString("login", "") ?: ""
+        passw = prefs.getString("passw", "") ?: ""
+        val dostup = prefs.getString("access", "") ?: ""
+        val wifiHomeNet = prefs.getString("wifihomenet", "") ?: ""
 
         when (dostup) {
             "1" -> {
@@ -200,7 +206,7 @@ class MainActivity : Activity() {
         }
 
         if (serverURL !== "") {
-            webView!!.loadUrl("http://$serverURL$pathHomepage")
+            binding.webView!!.loadUrl("http://$serverURL$pathHomepage")
         }
     }
 
@@ -225,8 +231,8 @@ class MainActivity : Activity() {
             REQ_CODE_SPEECH_INPUT -> {
                 if (resultCode == Activity.RESULT_OK && null != data) {
                     val result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
-                    val command = result[0]
-                    webPost!!.loadUrl("http://$serverURL$pathVoice$command")
+                    val command = result?.get(0)
+                    binding.webPost!!.loadUrl("http://$serverURL$pathVoice$command")
                     val toast = Toast.makeText(applicationContext, command, Toast.LENGTH_LONG)
                     toast.setGravity(Gravity.BOTTOM, 0, 0)
                     toast.show()
