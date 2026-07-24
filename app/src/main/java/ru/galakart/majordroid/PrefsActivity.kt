@@ -15,10 +15,11 @@ class PrefsActivity : PreferenceActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setScreen()
+        // setScreen()
         setWifiHomeNetButton()
     }
 
+    /*
     private fun setScreen() {
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
         val vid = prefs.getString("view", "")
@@ -33,6 +34,7 @@ class PrefsActivity : PreferenceActivity() {
             }
         }
     }
+    */
 
     private fun setWifiHomeNetButton() {
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)

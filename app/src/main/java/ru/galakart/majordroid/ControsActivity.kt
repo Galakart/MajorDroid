@@ -49,18 +49,18 @@ class ControsActivity : AppCompatActivity() {
     }
 
     private fun setScreenAndComponents() {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        val vid = prefs.getString("view", "")
-        when (vid) {
-            "1" -> {
-                window.addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN)
-                window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
-            }
-            "2" -> {
-                window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
-                window.clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN)
-            }
-        }
+        // val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        // val vid = prefs.getString("view", "")
+        // when (vid) {
+        //     "1" -> {
+        //         window.addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN)
+        //         window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
+        //     }
+        //     "2" -> {
+        //         window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
+        //         window.clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN)
+        //     }
+        // }
         binding.webPost!!.webViewClient = MajorDroidWebViewer()
         binding.tvLegend!!.movementMethod = ScrollingMovementMethod()
     }

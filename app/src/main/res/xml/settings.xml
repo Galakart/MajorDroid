@@ -9,6 +9,7 @@
         android:key="access"
         android:summary="@string/access_summary"
         android:title="@string/access" />
+    <!-- Режим отображения отключён
     <ListPreference
         android:defaultValue="1"
         android:dialogTitle="@string/view"
@@ -17,6 +18,7 @@
         android:key="view"
         android:summary="@string/view_summary"
         android:title="@string/view" />
+    -->
 
     <PreferenceCategory android:title="@string/serversettings" >
         <EditTextPreference

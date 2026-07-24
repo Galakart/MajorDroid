@@ -13,9 +13,10 @@ class AboutActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_about)
-        setScreen()
+        // setScreen()
     }
 
+    /*
     private fun setScreen() {
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
         val vid = prefs.getString("view", "")
@@ -30,6 +31,7 @@ class AboutActivity : Activity() {
             }
         }
     }
+    */
 
     fun View.rateExec() {
         val intent = Intent(Intent.ACTION_VIEW)
