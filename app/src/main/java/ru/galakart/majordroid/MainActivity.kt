@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity() {
 
     public override fun onResume() {
         super.onResume()
-        setScreen()
+        // setScreen()
         loadSettings()
         loadHomePage()
     }
@@ -113,6 +113,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // setScreen() — отключено: edge-to-edge на API 35+, FLAG_FULLSCREEN игнорируется
+    /*
     private fun setScreen() {
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
         val vid = prefs.getString("view", "")
@@ -134,6 +136,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+    */
 
     private fun loadSettings() {
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)

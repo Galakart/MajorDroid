@@ -15,6 +15,21 @@
     <!-- Application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+        <item name="android:alertDialogTheme">@style/AppAlertDialogTheme</item>
+        <item name="android:editTextColor">#FF222222</item>
+        <item name="android:textColorHint">#FF888888</item>
+    </style>
+
+    <!-- Тема диалогов: фикс белого текста на белом фоне на API 35/36.
+         Платформа принудительно использует светлый surface, поэтому текст должен быть тёмным.
+         Платформенный AlertDialog из PreferenceActivity читает android:alertDialogTheme. -->
+    <style name="AppAlertDialogTheme" parent="@android:style/Theme.Material.Light.Dialog.Alert">
+        <item name="android:colorAccent">@color/colorAccent</item>
+        <item name="android:textColor">#FF222222</item>
+        <item name="android:textColorPrimary">#FF222222</item>
+        <item name="android:textColorSecondary">#FF555555</item>
+        <item name="android:editTextColor">#FF222222</item>
+        <item name="android:textColorHint">#FF888888</item>
     </style>
 
 </resources>
